@@ -21,8 +21,9 @@ of the page and extract the text from the element which matches the selector.
 
 ## Development
 ### System requirements
+ - Fedora 39 or similar
  - Node.js 20
- - Firefox 121
+ - Firefox 121 or similar
 
 ### How to test
 ```bash
