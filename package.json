@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "open": "web-ext run -s dist",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "vite build && web-ext build -s dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
@@ -20,7 +19,6 @@
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "prettier": "^3.0.3",
-    "rollup-plugin-copy-watch": "^0.0.1",
     "rollup-plugin-execute": "^1.1.1",
     "vite": "^5.0.10",
     "vue": "^3.3.11",
