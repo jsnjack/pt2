@@ -118,8 +118,10 @@
     // Highlight selected element style
     var style = document.createElement("style"),
         pt_highlight_class = "pt-highlight";
-    style.innerHTML = "." + pt_highlight_class + "{background: #f5ecb1;outline: dashed black 2px;}";
     document.getElementsByTagName("head")[0].appendChild(style);
+    if (style.sheet) {
+        style.sheet.insertRule("." + pt_highlight_class + "{background: #f5ecb1;outline: dashed black 2px;}", 0);
+    }
 
     // Add events to catch item
     document.addEventListener("mouseover", pt_add_highlighter);
