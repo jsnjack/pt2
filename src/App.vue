@@ -1,49 +1,71 @@
 <script setup>
 import "beercss";
 
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import FooterOverview from './components/FooterOverview.vue'
+import ItemList from './components/ItemList.vue'
+
+import { onMounted, onUnmounted, ref, inject } from 'vue'
+
+const eventBus = inject('eventBus')
+
+let portToBackground = null;
+
+const showPopup = ref(true);
+const itemsList = ref({});
+
+onMounted(() => {
+  // Reset badge text
+  browser.action.setBadgeText({ text: "" });
+
+  // Read items from storage
+  browser.storage.local.get(null, function (items) {
+    // items is an object with items in storage
+    for (let key in items) {
+      console.log(key, items[key]);
+      itemsList.value[key] = items[key];
+    }
+  });
+
+  // Watch storage updates
+  browser.storage.onChanged.addListener(function (changes, area) {
+    console.log("Storage changed: ", changes, area);
+    for (let key in changes) {
+      if (changes[key].newValue) {
+        itemsList.value[key] = changes[key].newValue;
+      } else {
+        delete itemsList.value[key];
+      }
+    }
+  });
+
+  // Connect to the background script
+  portToBackground = browser.runtime.connect({ name: "popup" });
+  portToBackground.onMessage.addListener(function (msg) {
+    console.log("popup received message: ", msg);
+  });
+
+  eventBus.on('updateItem', payload => {
+    console.log("Received updateItem event from Item.vue, payload: ", payload)
+    portToBackground.postMessage({ signalID: "update-item", key: payload.key });
+  })
+})
+
+onUnmounted(() => {
+  // Disconnect from the background script
+  if (portToBackground) {
+    portToBackground.disconnect();
+    portToBackground = null;
+  }
+});
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it! :)" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
+  <main v-show="showPopup">
+    <ItemList :items="itemsList" />
+    <FooterOverview @togglePopup="showPopup = false" />
   </main>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>

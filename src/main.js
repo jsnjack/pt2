@@ -1,6 +1,15 @@
 import './assets/main.css'
 
-import { createApp } from 'vue'
+import { createApp, reactive } from 'vue'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+const eventBus = reactive({
+    emit(event, ...args) {
+        this[event] && this[event](...args)
+    },
+    on(event, callback) {
+        this[event] = callback
+    }
+})
+
+createApp(App).provide('eventBus', eventBus).mount('#app')

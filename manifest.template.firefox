@@ -18,5 +18,17 @@
             "64": "icon-64.png"
         },
         "default_popup": "index.html"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "*://*/*"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "background": {
+        "scripts": ["background.js"]
     }
 }
