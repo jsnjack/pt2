@@ -12,8 +12,11 @@
             "strict_min_version": "109.0"
         }
     },
-    "browser_action": {
+    "action": {
         "default_title": "pt2",
-        "default_popup": "index.html"
+        "default_icon": {
+            "64": "favicon.ico"
+        },
+        "default_popup_path": "index.html"
     }
 }
