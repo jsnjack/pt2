@@ -4,7 +4,7 @@
     "description": "pt2 is a browser extension which allows you to keep track of content changes on web pages.",
     "version": "${VERSION}",
     "icons": {
-        "64": "favicon.ico"
+        "64": "icon-64.png"
     },
     "browser_specific_settings": {
         "gecko": {
@@ -15,7 +15,7 @@
     "action": {
         "default_title": "pt2",
         "default_icon": {
-            "64": "favicon.ico"
+            "64": "icon-64.png"
         },
         "default_popup": "index.html"
     }
