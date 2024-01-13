@@ -66,6 +66,3 @@ onUnmounted(() => {
     <FooterOverview @togglePopup="showPopup = false" />
   </main>
 </template>
-
-<style scoped>
-</style>

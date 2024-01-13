@@ -2,7 +2,8 @@
 import { onMounted } from 'vue';
 
 <template>
-    <div class="fill medium-height middle-align center-align padding" v-if="Object.keys(props.items).length === 0">
+    <div class="medium-height middle-align center-align padding" style="background-color: var(--surface-container-lowest)"
+        v-if="Object.keys(props.items).length === 0">
         <div class="center-align">
             <i class="extra">orders</i>
             <h5>You have no items to track</h5>
@@ -22,3 +23,6 @@ const props = defineProps({
     }
 })
 </script>
+
+<style scoped>
+</style>
