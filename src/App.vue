@@ -1,12 +1,12 @@
 <script setup>
 import "beercss";
 
-import FooterOverview from './components/FooterOverview.vue'
-import ItemList from './components/ItemList.vue'
+import FooterOverview from "./components/FooterOverview.vue";
+import ItemList from "./components/ItemList.vue";
 
-import { onMounted, onUnmounted, ref, inject } from 'vue'
+import { onMounted, onUnmounted, ref, inject } from "vue";
 
-const eventBus = inject('eventBus')
+const eventBus = inject("eventBus");
 
 let portToBackground = null;
 
@@ -44,11 +44,11 @@ onMounted(() => {
     console.log("popup received message: ", msg);
   });
 
-  eventBus.on('updateItem', payload => {
-    console.log("Received updateItem event from Item.vue, payload: ", payload)
+  eventBus.on("updateItem", (payload) => {
+    console.log("Received updateItem event from Item.vue, payload: ", payload);
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
-  })
-})
+  });
+});
 
 onUnmounted(() => {
   // Disconnect from the background script
@@ -57,7 +57,6 @@ onUnmounted(() => {
     portToBackground = null;
   }
 });
-
 </script>
 
 <template>

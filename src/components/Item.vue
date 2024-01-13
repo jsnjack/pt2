@@ -1,6 +1,9 @@
 <template>
-  <div class="row item no-margin" :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'">
-    <div class="small-padding" @click="open" style="cursor: pointer;">
+  <div
+    class="row item no-margin"
+    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'"
+  >
+    <div class="small-padding" @click="open" style="cursor: pointer">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
     </div>
@@ -13,8 +16,12 @@
       <div class="overline small-text">{{ props.item.initialValue }}</div>
     </div>
     <div v-if="diff.changed && diff.diff !== 0" class="small-padding">
-      <div class="large-text" :style="'color: ' + textColour">{{ relativeDiffText }}</div>
-      <div class="small-text" :style="'color: ' + textColour">{{ diff.perc }}%</div>
+      <div class="large-text" :style="'color: ' + textColour">
+        {{ relativeDiffText }}
+      </div>
+      <div class="small-text" :style="'color: ' + textColour">
+        {{ diff.perc }}%
+      </div>
     </div>
     <div class="small-padding" @click="deleteItem">
       <button class="small circle transparent">
@@ -25,28 +32,28 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onMounted, defineEmits, inject } from 'vue'
-import { accounting } from "accounting"
+import { defineProps, computed, onMounted, defineEmits, inject } from "vue";
+import { accounting } from "accounting";
 
-const eventBus = inject('eventBus')
+const eventBus = inject("eventBus");
 
-const emit = defineEmits(['updateItem'])
+const emit = defineEmits(["updateItem"]);
 
 const props = defineProps({
   item: {
     type: Object,
-    required: true
+    required: true,
   },
   itemKey: {
     type: String,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 const hostname = computed(() => {
   let url = new URL(props.item.url);
   return url.hostname;
-})
+});
 
 const convertToNumber = function (str) {
   // Check if it is string
@@ -59,7 +66,7 @@ const convertToNumber = function (str) {
     }
   }
   return accounting.unformat(str);
-}
+};
 
 const formatWithCurrency = function (str, example) {
   var currency = example.replace(/[0-9,\.]/g, "");
@@ -68,7 +75,7 @@ const formatWithCurrency = function (str, example) {
   } else {
     return currency + str;
   }
-}
+};
 
 const diff = computed(() => {
   const currentValueToPrice = convertToNumber(props.item.currentValue);
@@ -86,21 +93,26 @@ const diff = computed(() => {
     initial: initialValueToPrice,
     diff: diff,
     perc: perc,
-  }
-  console.log("diff computed: ", data)
+  };
+  console.log("diff computed: ", data);
   return data;
-})
+});
 
 const relativeDiffText = computed(() => {
   if (diff.value.changed) {
     if (diff.value.diff < 0) {
-      return "Save " + formatWithCurrency(Math.abs(diff.value.diff), props.item.currentValue);
+      return (
+        "Save " +
+        formatWithCurrency(Math.abs(diff.value.diff), props.item.currentValue)
+      );
     } else {
-      return formatWithCurrency(diff.value.diff, props.item.currentValue) + " more";
+      return (
+        formatWithCurrency(diff.value.diff, props.item.currentValue) + " more"
+      );
     }
   }
   return "";
-})
+});
 
 const borderColour = computed(() => {
   if (diff.value.changed) {
@@ -111,7 +123,7 @@ const borderColour = computed(() => {
     }
   }
   return "grey";
-})
+});
 
 const textColour = computed(() => {
   if (diff.value.changed) {
@@ -122,7 +134,7 @@ const textColour = computed(() => {
     }
   }
   return "";
-})
+});
 
 function open() {
   browser.tabs.create({ url: props.item.url });
@@ -134,8 +146,8 @@ function deleteItem() {
 }
 
 onMounted(() => {
-  eventBus.emit('updateItem', { key: props.itemKey })
-})
+  eventBus.emit("updateItem", { key: props.itemKey });
+});
 </script>
 
 <style scoped>
