@@ -17,6 +17,6 @@
         "default_icon": {
             "64": "favicon.ico"
         },
-        "default_popup_path": "index.html"
+        "default_popup": "index.html"
     }
 }

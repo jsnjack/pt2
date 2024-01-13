@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     vue(),
     execute([
-      'VERSION=`monova` envsubst < manifest.template.firefox > public/manifest.json'
+      'VERSION=`monova` envsubst < manifest.template.firefox > dist/manifest.json'
     ], {
       hook: 'writeBundle'
     })
