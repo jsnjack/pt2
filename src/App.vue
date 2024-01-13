@@ -18,7 +18,7 @@ onMounted(() => {
   browser.action.setBadgeText({ text: "" });
 
   // Read items from storage
-  browser.storage.local.get(null, function (items) {
+  browser.storage.sync.get(null, function (items) {
     // items is an object with items in storage
     for (let key in items) {
       console.log(key, items[key]);

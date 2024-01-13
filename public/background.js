@@ -30,7 +30,7 @@ browser.runtime.onMessage.addListener(
             let obj = {};
             obj[id] = message.data;
             // Add new item to storage
-            browser.storage.local.set(obj);
+            browser.storage.sync.set(obj);
         }
 
     }
@@ -38,7 +38,7 @@ browser.runtime.onMessage.addListener(
 
 function updateItem(key) {
     console.log(`Background script is updating item ${key}...`);
-    browser.storage.local.get(key).then(function (result) {
+    browser.storage.sync.get(key).then(function (result) {
         console.log("Found in storage:", result);
         let item = result[key];
         console.log(`Fetchning URL ${item.url}...`);
@@ -59,7 +59,7 @@ function updateItem(key) {
                 title: item.title,
                 lastUpdate: new Date().getTime(),
             };
-            browser.storage.local.set(obj);
+            browser.storage.sync.set(obj);
         }, function (error) {
             console.log(error);
         });

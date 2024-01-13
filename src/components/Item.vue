@@ -130,7 +130,7 @@ function open() {
 }
 
 function deleteItem() {
-  browser.storage.local.remove(props.itemKey);
+  browser.storage.sync.remove(props.itemKey);
 }
 
 onMounted(() => {
