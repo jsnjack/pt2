@@ -1,22 +1,21 @@
 let portToPopup;
 
 browser.runtime.onConnect.addListener(function (port) {
-    console.log("Connected to popup script");
+    console.log("[pt2-background] Connected to popup script");
     portToPopup = port;
 
     // Listen for messages from the popup script
     portToPopup.onMessage.addListener(function (msg) {
-        console.log("Received message from popup script: ", msg);
+        console.log("[pt2-background] Received message from popup script: ", msg);
         if (msg.signalID === "update-item") {
             // The user wants to update the item
-            console.log("Update item " + msg.key);
             updateItem(msg.key);
         }
     });
 
     // Listen for the disconnect event
     portToPopup.onDisconnect.addListener(function () {
-        console.log("Disconnected from popup script");
+        console.log("[pt2-background] Disconnected from popup script");
     });
 });
 
@@ -37,13 +36,13 @@ browser.runtime.onMessage.addListener(
 );
 
 function updateItem(key) {
-    console.log(`Background script is updating item ${key}...`);
+    console.log(`[pt2-background-${key}] Updating item ...`);
     browser.storage.sync.get(key).then(function (result) {
-        console.log("Found in storage:", result);
+        console.log(`[pt2-background-${key}] Found in storage:`, result);
         let item = result[key];
-        console.log(`Fetchning URL ${item.url}...`);
+        console.log(`[pt2-background-${key}] Fetchning URL ${item.url}...`);
         fetch(item.url).then(function (response) {
-            console.log(`status: ${response.status} ${response.statusText}`);
+            console.log(`[pt2-background-${key}] status: ${response.status} ${response.statusText}`);
             return response.text();
         }).then(function (text) {
             let parser = new DOMParser();
@@ -61,7 +60,7 @@ function updateItem(key) {
             };
             browser.storage.sync.set(obj);
         }, function (error) {
-            console.log(error);
+            console.log(`[pt2-background-${key}]`, error);
         });
     });
 }
