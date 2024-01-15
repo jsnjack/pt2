@@ -39,15 +39,25 @@ function updateItem(key) {
     console.log(`[pt2-background-${key}] Updating item ...`);
     browser.storage.sync.get(key).then(function (result) {
         console.log(`[pt2-background-${key}] Found in storage:`, result);
-        let item = result[key];
+        const item = result[key];
         console.log(`[pt2-background-${key}] Fetchning URL ${item.url}...`);
         fetch(item.url).then(function (response) {
             console.log(`[pt2-background-${key}] status: ${response.status} ${response.statusText}`);
             return response.text();
         }).then(function (text) {
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(text, "text/html");
-            let value = doc.querySelector(item.selector).textContent;
+            const hostname = new URL(item.url).hostname;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, "text/html");
+            let value = "";
+            switch (hostname) {
+                case "www.belsimpel.nl":
+                    const el = doc.head.querySelector("#head_schema");
+                    const data = JSON.parse(el.textContent);
+                    value = `${data.offers.priceCurrency} ${data.offers.price}`;
+                    break;
+                default:
+                    value = doc.querySelector(item.selector).textContent;
+            }
             let obj = {};
             // API updates item in storage
             obj[key] = {
@@ -58,6 +68,7 @@ function updateItem(key) {
                 title: item.title,
                 lastUpdate: new Date().getTime(),
             };
+            console.log(`[pt2-background-${key}] Updating storage to:`, obj);
             browser.storage.sync.set(obj);
         }, function (error) {
             console.log(`[pt2-background-${key}]`, error);
