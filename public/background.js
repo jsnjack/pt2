@@ -56,7 +56,7 @@ function updateItem(key) {
                     value = `${data.offers.priceCurrency} ${data.offers.price}`;
                     break;
                 default:
-                    value = doc.querySelector(item.selector).textContent;
+                    value = doc.querySelector(item.selector).innerText;
             }
             let obj = {};
             // API updates item in storage

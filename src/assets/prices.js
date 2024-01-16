@@ -31,12 +31,24 @@ function extractPriceAndCurrency(str) {
   // Remove currency from price by removing the first and the last elements of parts array
   const priceParts = parts.slice(1, parts.length - 1);
 
-  // Remove from priceParts all elements which contain only whitespace or comma. Ignore new line
+  // Remove from priceParts all elements which contain only whitespaces. Ignore new line
   const pricePartsFiltered = priceParts.filter((part) => {
-    return (
-      (part.trim().length > 0 && part.trim() !== ",") || part.includes("\n")
-    );
+    return part.trim().length > 0 || part.includes("\n");
   });
+
+  // If every digital element is followed by another element which contains only
+  // comma and it is followed by another digital element which contains exaclty
+  // 3 digits, remove element with comma
+  for (let i = 0; i < pricePartsFiltered.length - 2; i++) {
+    if (
+      pricePartsFiltered[i].trim().match(/\d/) &&
+      pricePartsFiltered[i + 1].trim() === "," &&
+      pricePartsFiltered[i + 2].trim().match(/\d{3}/)
+    ) {
+      pricePartsFiltered.splice(i + 1, 1);
+      i--;
+    }
+  }
 
   // If every digital element is followed by another digital element, squash them together
   for (let i = 0; i < pricePartsFiltered.length - 1; i++) {

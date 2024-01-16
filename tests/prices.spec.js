@@ -86,3 +86,17 @@ test('handles price on bol.com', () => {
     expect(result).toEqual({ price: 20, currency: '' })
 })
 
+test('handles price on zalando', () => {
+    const result = extractPriceAndCurrency('€ 279,50')
+    expect(result).toEqual({ price: 279.5, currency: '€' })
+})
+
+test('handles price on ea', () => {
+    const result = extractPriceAndCurrency('€69.99')
+    expect(result).toEqual({ price: 69.99, currency: '€' })
+})
+
+test('handles price on fonq', () => {
+    const result = extractPriceAndCurrency('€\n69\n99')
+    expect(result).toEqual({ price: 69.99, currency: '€' })
+})
