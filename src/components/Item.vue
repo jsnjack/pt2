@@ -5,13 +5,12 @@
       <div class="small-text">{{ hostname }}</div>
     </div>
     <div class="max"></div>
+    <!--    There is no change -->
     <div v-if="!diff.changed" class="small-padding">
       <div>{{ props.item.currentValue }}</div>
     </div>
-    <div v-if="diff.changed" class="small-padding">
-      <div class="large-text">{{ props.item.currentValue }}</div>
-      <div class="overline small-text">{{ props.item.initialValue }}</div>
-    </div>
+    <!-- There is a change -->
+    <!-- Percentage -->
     <div v-if="diff.changed && diff.diff !== 0" class="small-padding">
       <div class="large-text" :style="'color: ' + textColour">
         {{ relativeDiffText }}
@@ -19,6 +18,11 @@
       <div class="small-text" :style="'color: ' + textColour">
         {{ diff.perc }}%
       </div>
+    </div>
+    <!-- Comparing old and new -->
+    <div v-if="diff.changed" class="small-padding">
+      <div class="large-text">{{ props.item.currentValue }}</div>
+      <div class="overline small-text">{{ props.item.initialValue }}</div>
     </div>
     <div class="small-padding" @click="deleteItem">
       <button class="small circle transparent">
@@ -81,6 +85,7 @@ const diff = computed(() => {
   let perc = 0;
   if (currentValueToPrice !== 0 && initialValueToPrice !== 0) {
     diff = currentValueToPrice - initialValueToPrice;
+    diff = Math.round(diff * 100) / 100;
     // Round perc to 2 digits
     perc = Math.round((diff / initialValueToPrice) * 10000) / 100;
   }
@@ -98,14 +103,9 @@ const diff = computed(() => {
 const relativeDiffText = computed(() => {
   if (diff.value.changed) {
     if (diff.value.diff < 0) {
-      return (
-        "Save " +
-        formatWithCurrency(Math.abs(diff.value.diff), props.item.currentValue)
-      );
+      return `Save ${formatWithCurrency(Math.abs(diff.value.diff), props.item.currentValue)}`;
     } else {
-      return (
-        formatWithCurrency(diff.value.diff, props.item.currentValue) + " more"
-      );
+      return `${formatWithCurrency(diff.value.diff, props.item.currentValue)} extra`;
     }
   }
   return "";
