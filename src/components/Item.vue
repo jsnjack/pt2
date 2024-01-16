@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="row item no-margin"
-    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'"
-  >
+  <div class="row item no-margin" :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'">
     <div class="small-padding" @click="open" style="cursor: pointer">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
@@ -94,7 +91,7 @@ const diff = computed(() => {
     diff: diff,
     perc: perc,
   };
-  console.log("diff computed: ", data);
+  console.log(`[pt2-popup] computed diff for ${props.itemKey}`, data);
   return data;
 });
 

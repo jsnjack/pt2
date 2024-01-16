@@ -2,7 +2,7 @@
 (function () {
     function pt_sendSignal(signal_id, data) {
         // Send signal to main function
-        console.log("pt_sendSignal: " + signal_id, data);
+        console.log(`[pt2-inject] sending signal ${signal_id}`, data);
         browser.runtime.sendMessage({
             signalID: signal_id,
             data: data

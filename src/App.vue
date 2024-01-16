@@ -21,14 +21,14 @@ onMounted(() => {
   browser.storage.sync.get(null, function (items) {
     // items is an object with items in storage
     for (let key in items) {
-      console.log(key, items[key]);
+      console.log(`[pt2-popup] found in storage ${key}`, items[key]);
       itemsList.value[key] = items[key];
     }
   });
 
   // Watch storage updates
   browser.storage.onChanged.addListener(function (changes, area) {
-    console.log("Storage changed: ", changes, area);
+    console.log("[pt2-popup] storage changed: ", changes);
     for (let key in changes) {
       if (changes[key].newValue) {
         itemsList.value[key] = changes[key].newValue;
@@ -41,11 +41,11 @@ onMounted(() => {
   // Connect to the background script
   portToBackground = browser.runtime.connect({ name: "popup" });
   portToBackground.onMessage.addListener(function (msg) {
-    console.log("popup received message: ", msg);
+    console.log("[pt2-popup] received msg from background script:", msg);
   });
 
   eventBus.on("updateItem", (payload) => {
-    console.log("Received updateItem event from Item.vue, payload: ", payload);
+    console.log(`[pt2-popup] asking background script to update ${payload.key}`);
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
   });
 });

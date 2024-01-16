@@ -17,16 +17,14 @@ import { defineEmits } from "vue";
 const emit = defineEmits(["togglePopup"]);
 
 function addNewItem() {
-  console.log("Emitting togglePopup event");
   emit("togglePopup");
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
     let currentTab = tabs[0];
     if (!currentTab) {
-      console.log("No active tab found, aborting");
       return;
     }
-    console.log("Injecting pt code into current tab...");
+    console.log("[pt2-popup] injecting inject.js in the current tab");
     browser.scripting.executeScript({
       target: {
         tabId: currentTab.id,
