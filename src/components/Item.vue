@@ -1,5 +1,8 @@
 <template>
-  <div class="row item no-margin" :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'">
+  <div
+    class="row item no-margin"
+    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'"
+  >
     <div class="small-padding" @click="open" style="cursor: pointer">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
@@ -72,8 +75,14 @@ const diff = computed(() => {
   if (parsedCurrent === null || parsedInitial === null) {
     return data;
   }
-  console.log(`[pt2-popup] parsed current price for ${props.itemKey}`, parsedCurrent);
-  console.log(`[pt2-popup] parsed initial price for ${props.itemKey}`, parsedInitial);
+  console.log(
+    `[pt2-popup] parsed current price for ${props.itemKey}`,
+    parsedCurrent,
+  );
+  console.log(
+    `[pt2-popup] parsed initial price for ${props.itemKey}`,
+    parsedInitial,
+  );
   data.diff = parsedCurrent.price - parsedInitial.price;
   console.log(`[pt2-popup] diff for ${props.itemKey}`, data.diff);
   // Round diff to 2 digits
@@ -85,7 +94,10 @@ const diff = computed(() => {
   // Normalize diff with extracted currency
   data.current = `${parsedCurrent.currency}${parsedCurrent.price}`;
   data.initial = `${parsedInitial.currency}${parsedInitial.price}`;
-  data.currency = parsedCurrent.currency === parsedInitial.currency ? parsedCurrent.currency : `${parsedCurrent.currency}*`;
+  data.currency =
+    parsedCurrent.currency === parsedInitial.currency
+      ? parsedCurrent.currency
+      : `${parsedCurrent.currency}*`;
   console.log(`[pt2-popup] computed diff for ${props.itemKey}`, data);
   return data;
 });

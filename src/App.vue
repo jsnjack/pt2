@@ -45,7 +45,9 @@ onMounted(() => {
   });
 
   eventBus.on("updateItem", (payload) => {
-    console.log(`[pt2-popup] asking background script to update ${payload.key}`);
+    console.log(
+      `[pt2-popup] asking background script to update ${payload.key}`,
+    );
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
   });
 });
