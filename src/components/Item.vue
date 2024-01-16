@@ -7,7 +7,7 @@
     <div class="max"></div>
     <!--    There is no change -->
     <div v-if="!diff.changed" class="small-padding">
-      <div>{{ props.item.currentValue }}</div>
+      <div>{{ diff.current }}</div>
     </div>
     <!-- There is a change -->
     <!-- Percentage -->
@@ -16,13 +16,13 @@
         {{ relativeDiffText }}
       </div>
       <div class="small-text" :style="'color: ' + textColour">
-        {{ diff.perc }}%
+        {{ percText }}
       </div>
     </div>
     <!-- Comparing old and new -->
     <div v-if="diff.changed" class="small-padding">
-      <div class="large-text">{{ props.item.currentValue }}</div>
-      <div class="overline small-text">{{ props.item.initialValue }}</div>
+      <div class="large-text">{{ diff.current }}</div>
+      <div class="overline small-text">{{ diff.initial }}</div>
     </div>
     <div class="small-padding" @click="deleteItem">
       <button class="small circle transparent">
@@ -34,7 +34,7 @@
 
 <script setup>
 import { defineProps, computed, onMounted, defineEmits, inject } from "vue";
-import { accounting } from "accounting";
+import { extractPriceAndCurrency } from "@/assets/prices";
 
 const eventBus = inject("eventBus");
 
@@ -56,46 +56,36 @@ const hostname = computed(() => {
   return url.hostname;
 });
 
-const convertToNumber = function (str) {
-  // Check if it is string
-  if (typeof str !== "string") {
-    return 0;
-  }
-  if (str.indexOf(",") > 0) {
-    if (str.split(",")[1].length !== 3) {
-      return accounting.unformat(str, ",");
-    }
-  }
-  return accounting.unformat(str);
-};
-
-const formatWithCurrency = function (str, example) {
-  var currency = example.replace(/[0-9,\.]/g, "");
-  if (parseInt(str[0], 10) > 0) {
-    return str + currency;
-  } else {
-    return currency + str;
-  }
-};
-
 const diff = computed(() => {
-  const currentValueToPrice = convertToNumber(props.item.currentValue);
-  const initialValueToPrice = convertToNumber(props.item.initialValue);
-  let diff = 0;
-  let perc = 0;
-  if (currentValueToPrice !== 0 && initialValueToPrice !== 0) {
-    diff = currentValueToPrice - initialValueToPrice;
-    diff = Math.round(diff * 100) / 100;
-    // Round perc to 2 digits
-    perc = Math.round((diff / initialValueToPrice) * 10000) / 100;
-  }
-  const data = {
+  let data = {
     changed: props.item.currentValue !== props.item.initialValue,
-    current: currentValueToPrice,
-    initial: initialValueToPrice,
-    diff: diff,
-    perc: perc,
+    current: props.item.currentValue,
+    initial: props.item.initialValue,
+    diff: 0,
+    perc: 0,
+    currency: "",
   };
+  const parsedCurrent = extractPriceAndCurrency(props.item.currentValue);
+  const parsedInitial = extractPriceAndCurrency(props.item.initialValue);
+  // If any of extractPriceAndCurrency returns null, it means that the price is not valid
+  // and we will just show the diff as text
+  if (parsedCurrent === null || parsedInitial === null) {
+    return data;
+  }
+  console.log(`[pt2-popup] parsed current price for ${props.itemKey}`, parsedCurrent);
+  console.log(`[pt2-popup] parsed initial price for ${props.itemKey}`, parsedInitial);
+  data.diff = parsedCurrent.price - parsedInitial.price;
+  console.log(`[pt2-popup] diff for ${props.itemKey}`, data.diff);
+  // Round diff to 2 digits
+  data.diff = Math.round(data.diff * 100) / 100;
+  console.log(`[pt2-popup] diff2 for ${props.itemKey}`, data.diff);
+  // Round perc to 2 digits
+  data.perc = Math.round((data.diff / parsedInitial.price) * 10000) / 100;
+
+  // Normalize diff with extracted currency
+  data.current = `${parsedCurrent.currency}${parsedCurrent.price}`;
+  data.initial = `${parsedInitial.currency}${parsedInitial.price}`;
+  data.currency = parsedCurrent.currency === parsedInitial.currency ? parsedCurrent.currency : `${parsedCurrent.currency}*`;
   console.log(`[pt2-popup] computed diff for ${props.itemKey}`, data);
   return data;
 });
@@ -103,9 +93,20 @@ const diff = computed(() => {
 const relativeDiffText = computed(() => {
   if (diff.value.changed) {
     if (diff.value.diff < 0) {
-      return `Save ${formatWithCurrency(Math.abs(diff.value.diff), props.item.currentValue)}`;
+      return `Save ${diff.value.currency}${Math.abs(diff.value.diff)}`;
     } else {
-      return `${formatWithCurrency(diff.value.diff, props.item.currentValue)} extra`;
+      return `${diff.value.currency}${diff.value.diff} extra`;
+    }
+  }
+  return "";
+});
+
+const percText = computed(() => {
+  if (diff.value.changed) {
+    if (diff.value.diff < 0) {
+      return `${diff.value.perc}%`;
+    } else {
+      return `+${diff.value.perc}%`;
     }
   }
   return "";
