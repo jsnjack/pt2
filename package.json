@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "open": "web-ext run -s dist",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "vite build && web-ext build -s dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "test": "vitest"
