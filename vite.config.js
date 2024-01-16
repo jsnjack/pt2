@@ -15,7 +15,7 @@ export default defineConfig({
       hook: 'writeBundle'
     }),
     copy({
-      watch: 'public',
+      watch: process.argv.includes('--watch') ? 'public' : undefined,
       targets: [
         { src: 'public/*', dest: 'dist' }
       ]
