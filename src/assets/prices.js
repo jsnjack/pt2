@@ -1,3 +1,5 @@
+import { currencySymbols } from "./currencies";
+
 function extractPriceAndCurrency(str) {
   let data = str.trim();
   // Split string into 3 parts: before the first digit, the middle, after the last digit
@@ -9,23 +11,31 @@ function extractPriceAndCurrency(str) {
   }
 
   // Prefer currency symbol before the price
-  let currency = parts[0].trim();
-  if (currency.length === 0) {
-    currency = parts[parts.length - 1].trim();
+  let currencyStr = parts[0].trim();
+  if (currencyStr.length === 0) {
+    currencyStr = parts[parts.length - 1].trim();
   }
 
   // Convert currency to uppercase
-  currency = currency.toUpperCase();
-  switch (currency) {
-    case "EUR":
-      currency = "€";
+  currencyStr = currencyStr.toUpperCase();
+
+  let currency = currencyStr;
+  let foundCurrency = false;
+
+  // Check if currency string contains one of tthe recognized currency names
+  // according to ISO 4217
+  for (const [currencyCode, currencySymbol] of Object.entries(currencySymbols)) {
+    if (currencyStr.includes(currencyCode) || currencyStr.includes(currencySymbol)) {
+      currency = currencySymbol.toUpperCase();
+      foundCurrency = true;
       break;
-    case "USD":
-      currency = "$";
-      break;
-    case "-":
-      currency = "";
-      break;
+    }
+  }
+
+  // If currency string does not contain one of the recognized currency names,
+  // assume EUR
+  if (!foundCurrency) {
+    currency = "€";
   }
 
   // Remove currency from price by removing the first and the last elements of parts array

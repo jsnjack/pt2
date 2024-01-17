@@ -8,7 +8,7 @@ test('extracts price and currency correctly', () => {
 
 test('handles no currency', () => {
     const result = extractPriceAndCurrency('123.45')
-    expect(result).toEqual({ price: 123.45, currency: '' })
+    expect(result).toEqual({ price: 123.45, currency: '€' })
 })
 
 test('returns null when no match is found', () => {
@@ -63,27 +63,27 @@ test('handles comma as separator', () => {
 
 test('handles price with new line as delimeter', () => {
     const result = extractPriceAndCurrency('12 \n 30')
-    expect(result).toEqual({ price: 12.30, currency: '' })
+    expect(result).toEqual({ price: 12.30, currency: '€' })
 })
 
 test('handles price with currency without symbol', () => {
     const result = extractPriceAndCurrency('123BYN')
-    expect(result).toEqual({ price: 123, currency: 'BYN' })
+    expect(result).toEqual({ price: 123, currency: 'BR' })
 })
 
 test('handles price with currency without symbol in lower case', () => {
     const result = extractPriceAndCurrency('123byn')
-    expect(result).toEqual({ price: 123, currency: 'BYN' })
+    expect(result).toEqual({ price: 123, currency: 'BR' })
 })
 
 test('handles price with currency without symbol in mixed case', () => {
     const result = extractPriceAndCurrency('123bYn')
-    expect(result).toEqual({ price: 123, currency: 'BYN' })
+    expect(result).toEqual({ price: 123, currency: 'BR' })
 })
 
 test('handles price on bol.com', () => {
     const result = extractPriceAndCurrency('20\n  -\n')
-    expect(result).toEqual({ price: 20, currency: '' })
+    expect(result).toEqual({ price: 20, currency: '€' })
 })
 
 test('handles price on zalando', () => {
@@ -99,4 +99,9 @@ test('handles price on ea', () => {
 test('handles price on fonq', () => {
     const result = extractPriceAndCurrency('€\n69\n99')
     expect(result).toEqual({ price: 69.99, currency: '€' })
+})
+
+test('handles price on zalando with text', () => {
+    const result = extractPriceAndCurrency('Vanaf € 221,95')
+    expect(result).toEqual({ price: 221.95, currency: '€' })
 })
