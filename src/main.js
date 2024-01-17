@@ -1,13 +1,9 @@
-import { createApp, reactive } from "vue";
+import { createApp, provide } from "vue";
 import App from "./App.vue";
+import eventBus from './eventBus';
 
-const eventBus = reactive({
-  emit(event, ...args) {
-    this[event] && this[event](...args);
-  },
-  on(event, callback) {
-    this[event] = callback;
-  },
-});
+const app = createApp(App);
 
-createApp(App).provide("eventBus", eventBus).mount("#app");
+app.provide('eventBus', eventBus);
+
+app.mount('#app');

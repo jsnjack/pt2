@@ -30,6 +30,7 @@ onMounted(() => {
   browser.storage.onChanged.addListener(function (changes, area) {
     console.log("[pt2-popup] storage changed: ", changes);
     for (let key in changes) {
+      eventBus.emit("itemUpdateFinished", { "key": key });
       if (changes[key].newValue) {
         itemsList.value[key] = changes[key].newValue;
       } else {
@@ -49,6 +50,7 @@ onMounted(() => {
       `[pt2-popup] asking background script to update ${payload.key}`,
     );
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
+    eventBus.emit("itemUpdateStarted", { "key": payload.key });
   });
 });
 

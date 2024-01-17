@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="row item no-margin"
-    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'"
-  >
+  <div class="row item no-margin" :class="{ 'is-updating': isUpdating }"
+    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'">
     <div class="small-padding" @click="open" style="cursor: pointer">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
@@ -36,7 +34,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onMounted, defineEmits, inject } from "vue";
+import { defineProps, computed, onMounted, defineEmits, inject, ref, onBeforeUnmount } from "vue";
 import { extractPriceAndCurrency } from "@/assets/prices";
 
 const eventBus = inject("eventBus");
@@ -53,6 +51,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const isUpdating = ref(false);
 
 const hostname = computed(() => {
   let url = new URL(props.item.url);
@@ -156,8 +156,27 @@ function deleteItem() {
 }
 
 onMounted(() => {
-  eventBus.emit("updateItem", { key: props.itemKey });
+  eventBus.on("itemUpdateStarted", itemUpdateStartedHandler);
+  eventBus.on("itemUpdateFinished", itemUpdateFinishedHandler);
+  eventBus.emit("updateItem", { "key": props.itemKey });
 });
+
+onBeforeUnmount(() => {
+  eventBus.off("itemUpdateStarted", itemUpdateStartedHandler);
+  eventBus.off("itemUpdateFinished", itemUpdateFinishedHandler);
+});
+
+function itemUpdateStartedHandler(payload) {
+  if (payload.key === props.itemKey) {
+    isUpdating.value = true;
+  }
+}
+
+function itemUpdateFinishedHandler(payload) {
+  if (payload.key === props.itemKey) {
+    isUpdating.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -170,5 +189,9 @@ onMounted(() => {
 
 .item {
   background-color: var(--surface-container-lowest);
+}
+
+.is-updating {
+  filter: blur(2px);
 }
 </style>
