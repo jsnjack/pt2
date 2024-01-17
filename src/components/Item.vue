@@ -1,6 +1,5 @@
 <template>
-  <div class="row item no-margin" :class="{ 'is-updating': isUpdating }"
-    :style="'border-left: 4px ' + borderColour + ' solid; height: 100%;'">
+  <div class="row item no-margin" :class="{ 'is-updating': isUpdating }">
     <div class="small-padding" @click="open" style="cursor: pointer">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
@@ -9,19 +8,19 @@
     <div v-if="!diff.changed" class="small-padding max" style="text-align: right;">
       <div class="large-text">{{ diff.current }}</div>
     </div>
-
     <!-- There is a change -->
     <!-- Percentage -->
-    <div v-if="diff.changed" class="small-padding max" style="text-align: left;">
-      <div class="large-text" :style="'color: ' + textColour">
+    <div v-if="diff.changed" class="small-padding" style="text-align: left; min-width: 100px;"
+      :style="'background-color: ' + changeBackground + ';'">
+      <div class="large-text bold" :style="'color: ' + 'white'">
         {{ relativeDiffText }}
       </div>
-      <div class="small-text" :style="'color: ' + textColour">
+      <div class="small-text bold" :style="'color: ' + 'white'">
         {{ percText }}
       </div>
     </div>
     <!-- Comparing old and new -->
-    <div v-if="diff.changed" class="small-padding">
+    <div v-if="diff.changed" class="small-padding max" style="text-align: right;">
       <div class="large-text">{{ diff.current }}</div>
       <div class="overline small-text">{{ diff.initial }}</div>
     </div>
@@ -107,9 +106,9 @@ const diff = computed(() => {
 const relativeDiffText = computed(() => {
   if (diff.value.changed) {
     if (diff.value.diff < 0) {
-      return `Save ${diff.value.currency}${Math.abs(diff.value.diff)}`;
+      return `-${diff.value.currency}${Math.abs(diff.value.diff)}`;
     } else {
-      return `${diff.value.currency}${diff.value.diff} extra`;
+      return `+${diff.value.currency}${diff.value.diff}`;
     }
   }
   return "";
@@ -126,23 +125,12 @@ const percText = computed(() => {
   return "";
 });
 
-const borderColour = computed(() => {
+const changeBackground = computed(() => {
   if (diff.value.changed) {
     if (diff.value.diff < 0) {
       return "green";
     } else {
-      return "red";
-    }
-  }
-  return "grey";
-});
-
-const textColour = computed(() => {
-  if (diff.value.changed) {
-    if (diff.value.diff < 0) {
-      return "green";
-    } else {
-      return "red";
+      return "#d2451e";
     }
   }
   return "";
