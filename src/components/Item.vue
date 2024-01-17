@@ -5,14 +5,14 @@
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
     </div>
-    <div class="max"></div>
     <!--    There is no change -->
-    <div v-if="!diff.changed" class="small-padding">
-      <div>{{ diff.current }}</div>
+    <div v-if="!diff.changed" class="small-padding max" style="text-align: right;">
+      <div class="large-text">{{ diff.current }}</div>
     </div>
+
     <!-- There is a change -->
     <!-- Percentage -->
-    <div v-if="diff.changed && diff.diff !== 0" class="small-padding">
+    <div v-if="diff.changed" class="small-padding max" style="text-align: left;">
       <div class="large-text" :style="'color: ' + textColour">
         {{ relativeDiffText }}
       </div>
@@ -61,7 +61,7 @@ const hostname = computed(() => {
 
 const diff = computed(() => {
   let data = {
-    changed: props.item.currentValue !== props.item.initialValue,
+    changed: false,
     current: props.item.currentValue,
     initial: props.item.initialValue,
     diff: 0,
@@ -73,6 +73,7 @@ const diff = computed(() => {
   // If any of extractPriceAndCurrency returns null, it means that the price is not valid
   // and we will just show the diff as text
   if (parsedCurrent === null || parsedInitial === null) {
+    data.changed = props.item.currentValue !== props.item.initialValue;
     return data;
   }
   console.log(
@@ -83,6 +84,7 @@ const diff = computed(() => {
     `[pt2-popup] parsed initial price for ${props.itemKey}`,
     parsedInitial,
   );
+  data.changed = parsedCurrent.price !== parsedInitial.price;
   data.diff = parsedCurrent.price - parsedInitial.price;
   console.log(`[pt2-popup] diff for ${props.itemKey}`, data.diff);
   // Round diff to 2 digits
