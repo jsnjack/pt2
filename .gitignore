@@ -106,4 +106,4 @@ dist
 public/manifest.json
 .monova.history
 web-ext-artifacts/
-fixtures
+fixtures.js
