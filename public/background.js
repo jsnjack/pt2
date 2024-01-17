@@ -35,6 +35,20 @@ browser.runtime.onMessage.addListener(
     }
 );
 
+function getTextContentRecursive(element) {
+    let textContent = "";
+    if (element.hasChildNodes()) {
+        element.childNodes.forEach((child) => {
+            if (child.nodeType === Node.TEXT_NODE) {
+                textContent += child.textContent + "\n";
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                textContent += getTextContentRecursive(child);
+            }
+        });
+    }
+    return element.textContent;
+}
+
 function updateItem(key) {
     console.log(`[pt2-background-${key}] Updating item ...`);
     browser.storage.sync.get(key).then(function (result) {
@@ -56,7 +70,10 @@ function updateItem(key) {
                     value = `${data.offers.priceCurrency} ${data.offers.price}`;
                     break;
                 default:
-                    value = doc.querySelector(item.selector).innerText;
+                    // Getting just textContent is not enough, as sometines the full price
+                    // is divided between multiple html elements
+                    const el2 = doc.querySelector(item.selector);
+                    value = getTextContentRecursive(el2);
             }
             let obj = {};
             // API updates item in storage
