@@ -24,8 +24,16 @@
       <div class="large-text">{{ diff.current }}</div>
       <div class="overline small-text">{{ diff.initial }}</div>
     </div>
-    <div class="small-padding" @click="deleteItem">
+    <div class="small-padding" @click="toggleBottomMenu">
       <button class="small circle transparent">
+        <i>keyboard_arrow_down</i>
+      </button>
+    </div>
+  </div>
+
+  <div v-show="showBottomMenu" class="row item no-margin">
+    <div class="small-padding center">
+      <button class="small circle transparent" @click="deleteItem">
         <i>delete</i>
       </button>
     </div>
@@ -33,8 +41,8 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onMounted, defineEmits, inject, ref, onBeforeUnmount } from "vue";
 import { extractPriceAndCurrency } from "@/assets/prices";
+import { computed, defineEmits, defineProps, inject, onBeforeUnmount, onMounted, ref } from "vue";
 
 const eventBus = inject("eventBus");
 
@@ -52,6 +60,7 @@ const props = defineProps({
 });
 
 const isUpdating = ref(false);
+const showBottomMenu = ref(false);
 
 const hostname = computed(() => {
   let url = new URL(props.item.url);
@@ -143,6 +152,10 @@ function open() {
 
 function deleteItem() {
   browser.storage.sync.remove(props.itemKey);
+}
+
+function toggleBottomMenu() {
+  showBottomMenu.value = !showBottomMenu.value;
 }
 
 onMounted(() => {
