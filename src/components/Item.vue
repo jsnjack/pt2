@@ -26,8 +26,16 @@
     </div>
     <div class="small-padding" @click="toggleBottomMenu">
       <button class="small circle transparent">
-        <i>keyboard_arrow_down</i>
+        <i v-if="!showBottomMenu">keyboard_arrow_down</i>
+        <i v-else>save</i>
       </button>
+    </div>
+  </div>
+
+  <div v-show="showBottomMenu" class="row item no-margin">
+    <div class="field label border small max" style="margin-left: 10px; margin-right: 10px;">
+      <input type="text" class="small" v-model="newTitle" />
+      <label>Rename item</label>
     </div>
   </div>
 
@@ -61,6 +69,7 @@ const props = defineProps({
 
 const isUpdating = ref(false);
 const showBottomMenu = ref(false);
+const newTitle = ref("");
 
 const hostname = computed(() => {
   let url = new URL(props.item.url);
@@ -155,13 +164,27 @@ function deleteItem() {
 }
 
 function toggleBottomMenu() {
+  doRename();
   showBottomMenu.value = !showBottomMenu.value;
+}
+
+function doRename() {
+  if (newTitle.value === props.item.title || newTitle.value === "") {
+    return;
+  }
+  browser.storage.sync.set({
+    [props.itemKey]: {
+      ...props.item,
+      title: newTitle.value,
+    },
+  });
 }
 
 onMounted(() => {
   eventBus.on("itemUpdateStarted", itemUpdateStartedHandler);
   eventBus.on("itemUpdateFinished", itemUpdateFinishedHandler);
   eventBus.emit("updateItem", { "key": props.itemKey });
+  newTitle.value = props.item.title;
 });
 
 onBeforeUnmount(() => {
