@@ -1,5 +1,7 @@
 /*globals self, document, window */
 (function () {
+    const cssClassRegex = /^[a-zA-Z0-9_-]+$/;
+
     function pt_sendSignal(signal_id, data) {
         // Send signal to main function
         console.log(`[pt2-inject] sending signal ${signal_id}`, data);
@@ -46,6 +48,11 @@
             for (var i = 0; i < element.classList.length; i = i + 1) {
                 // Is this className unique by itself?
                 selector = '.' + element.classList.item(i);
+                // Only accept very simple class names, to make sure the invalid
+                // selector is not returned.
+                if (!cssClassRegex.test(selector)) {
+                    continue;
+                }
                 matches = document.querySelectorAll(selector);
                 if (matches.length === 1) {
                     return selector;
