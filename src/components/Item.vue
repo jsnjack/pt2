@@ -207,7 +207,7 @@ function itemUpdateFinishedHandler(payload) {
 
 <style scoped>
 .crop-text {
-  max-width: 200px;
+  width: 250px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
