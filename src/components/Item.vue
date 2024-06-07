@@ -27,7 +27,7 @@
     <div class="small-padding" @click="toggleBottomMenu">
       <button class="small circle transparent">
         <i v-if="!showBottomMenu">keyboard_arrow_down</i>
-        <i v-else>save</i>
+        <i v-else>check</i>
       </button>
     </div>
   </div>
