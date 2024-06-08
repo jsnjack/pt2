@@ -6,12 +6,12 @@
       <h5>You have no items to track</h5>
     </div>
   </div>
-  <Item v-for="item in orderedItemsList" :key="item.key" :item="item" :itemKey="item.key" />
+  <Item v-for="item in orderedItemsList" :key="item._key" :item="item" :itemKey="item._key" />
 </template>
 
 <script setup>
+import { computed, defineProps } from "vue";
 import Item from "./Item.vue";
-import { defineProps, computed } from "vue";
 
 const props = defineProps({
   items: {
@@ -22,9 +22,30 @@ const props = defineProps({
 
 const orderedItemsList = computed(() => {
   let orderedItems = [];
+
+  // First, add all items that are not linked to another item (main items)
   for (let key in props.items) {
+    if (props.items[key].linkedTo !== "") {
+      continue;
+    }
     orderedItems.push(props.items[key]);
-    orderedItems[orderedItems.length - 1].key = key;
+    orderedItems[orderedItems.length - 1]._key = key;
+    orderedItems[orderedItems.length - 1]._linked = [];
+  }
+
+  // Then, add all items that are linked to another item (linked items)
+  for (let key in props.items) {
+    if (props.items[key].linkedTo !== "") {
+      let linkedTo = props.items[key].linkedTo;
+      let self = props.items[key];
+      let linkedToItemIndex = orderedItems.findIndex((item) => item._key === linkedTo);
+      if (linkedToItemIndex === -1) {
+        console.error(`[ItemList] linked item ${key} is linked to ${linkedTo}, but ${linkedTo} is not in the list`);
+        continue;
+      }
+      self._key = key;
+      orderedItems[linkedToItemIndex]._linked.push(self);
+    }
   }
   return orderedItems.sort((a, b) => {
     return a.title.localeCompare(b.title);
@@ -32,5 +53,4 @@ const orderedItemsList = computed(() => {
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest'
+import { expect, test } from 'vitest'
 import { extractPriceAndCurrency } from '../src/assets/prices.js'
 
 test('extracts price and currency correctly', () => {

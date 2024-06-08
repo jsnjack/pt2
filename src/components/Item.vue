@@ -49,11 +49,15 @@
       </button>
     </div>
   </div>
+
+  <LinkedItem v-show="showBottomMenu" v-for="linkedItem in props.item._linked" :key="linkedItem._key" :item="linkedItem"
+    :itemKey="linkedItem._key" />
 </template>
 
 <script setup>
 import { extractPriceAndCurrency } from "@/assets/prices";
 import { computed, defineEmits, defineProps, inject, onBeforeUnmount, onMounted, ref } from "vue";
+import LinkedItem from "./LinkedItem.vue";
 
 const eventBus = inject("eventBus");
 
@@ -76,7 +80,21 @@ const newTitle = ref("");
 
 const hostname = computed(() => {
   let url = new URL(props.item.url);
+  if (props.item._linked.length > 0) {
+    return `${url.hostname} +${props.item._linked.length} more`;
+  }
   return url.hostname;
+});
+
+const minCurrentPrice = computed(() => {
+  let minPrice = extractPriceAndCurrency(props.item.currentValue);
+  props.item._linked.forEach((linkedItem) => {
+    let linkedItemPrice = extractPriceAndCurrency(linkedItem.currentValue);
+    if (linkedItemPrice.price < minPrice.price) {
+      minPrice = linkedItemPrice;
+    }
+  });
+  return minPrice;
 });
 
 const diff = computed(() => {
@@ -88,7 +106,7 @@ const diff = computed(() => {
     perc: 0,
     currency: "",
   };
-  const parsedCurrent = extractPriceAndCurrency(props.item.currentValue);
+  const parsedCurrent = minCurrentPrice.value;
   const parsedInitial = extractPriceAndCurrency(props.item.initialValue);
   // If any of extractPriceAndCurrency returns null, it means that the price is not valid
   // and we will just show the diff as text
@@ -179,11 +197,16 @@ function doRename() {
   if (newTitle.value === props.item.title || newTitle.value === "") {
     return;
   }
+  let obj = { ...props.item };
+  obj.title = newTitle.value;
+  // delete all keys which start with underscore
+  for (let key in obj) {
+    if (key.startsWith("_")) {
+      delete obj[key];
+    }
+  }
   browser.storage.sync.set({
-    [props.itemKey]: {
-      ...props.item,
-      title: newTitle.value,
-    },
+    [props.itemKey]: obj,
   });
 }
 
@@ -191,6 +214,9 @@ onMounted(() => {
   eventBus.on("itemUpdateStarted", itemUpdateStartedHandler);
   eventBus.on("itemUpdateFinished", itemUpdateFinishedHandler);
   eventBus.emit("updateItem", { "key": props.itemKey });
+  props.item._linked.forEach((linkedItem) => {
+    eventBus.emit("updateItem", { "key": linkedItem._key });
+  });
   newTitle.value = props.item.title;
 });
 
