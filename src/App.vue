@@ -4,7 +4,7 @@ import "beercss";
 import FooterOverview from "./components/FooterOverview.vue";
 import ItemList from "./components/ItemList.vue";
 
-import { onMounted, onUnmounted, ref, inject } from "vue";
+import { inject, onMounted, onUnmounted, ref } from "vue";
 
 const eventBus = inject("eventBus");
 
@@ -51,6 +51,36 @@ onMounted(() => {
     );
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
     eventBus.emit("itemUpdateStarted", { "key": payload.key });
+  });
+
+  eventBus.on("addNewItem", (payload) => {
+    console.log("[pt2-popup] asking background script to add a new item");
+    showPopup.value = false;
+
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+      let currentTab = tabs[0];
+      if (!currentTab) {
+        return;
+      }
+      console.log(`[pt2-popup] injecting inject.js in the current tab (linked to ${payload.linkedTo})`);
+      function setLinkedTo(linkedTo) {
+        document.body.setAttribute("pt2-linked-to", linkedTo);
+      }
+      browser.scripting.executeScript({
+        target: {
+          tabId: currentTab.id,
+        },
+        func: setLinkedTo,
+        args: [payload.linkedTo || ""],
+      });
+
+      browser.scripting.executeScript({
+        target: {
+          tabId: currentTab.id,
+        },
+        files: ["inject.js"],
+      });
+    });
   });
 });
 

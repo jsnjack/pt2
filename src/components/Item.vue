@@ -41,6 +41,9 @@
 
   <div v-show="showBottomMenu" class="row item no-margin">
     <div class="small-padding center">
+      <button class="small circle transparent" @click="addLinkedItem">
+        <i>library_add</i>
+      </button>
       <button class="small circle transparent" @click="deleteItem">
         <i>delete</i>
       </button>
@@ -54,7 +57,7 @@ import { computed, defineEmits, defineProps, inject, onBeforeUnmount, onMounted,
 
 const eventBus = inject("eventBus");
 
-const emit = defineEmits(["updateItem"]);
+const emit = defineEmits(["updateItem", "addNewItem"]);
 
 const props = defineProps({
   item: {
@@ -161,6 +164,10 @@ function open() {
 
 function deleteItem() {
   browser.storage.sync.remove(props.itemKey);
+}
+
+function addLinkedItem() {
+  eventBus.emit("addNewItem", { "linkedTo": props.itemKey });
 }
 
 function toggleBottomMenu() {

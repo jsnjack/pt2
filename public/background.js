@@ -78,11 +78,12 @@ function updateItem(key) {
             let obj = {};
             // API updates item in storage
             obj[key] = {
-                currentValue: value,
-                initialValue: item.initialValue || value,
                 url: item.url,
                 selector: item.selector,
                 title: item.title,
+                linkedTo: item.linkedTo || "",
+                initialValue: item.initialValue || value,
+                currentValue: value,
                 lastUpdate: new Date().getTime(),
             };
             console.log(`[pt2-background-${key}] Updating storage to:`, obj);

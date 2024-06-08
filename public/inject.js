@@ -109,11 +109,16 @@
         var element = event.target;
         element.classList.remove(pt_highlight_class);
         element.removeEventListener("mouseout", pt_remove_highlighter);
-        pt_sendSignal("inject-return-data", {
+        let payload = {
             "url": window.location.href,
             "selector": pt_getUniqueSelector(element),
             "title": document.title,
-        });
+            "initialValue": "",
+            "currentValue": "",
+            "lastUpdate": new Date().getTime(),
+            "linkedTo": document.body.getAttribute("pt2-linked-to") || "",
+        };
+        pt_sendSignal("inject-return-data", payload);
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();

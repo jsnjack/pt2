@@ -12,26 +12,14 @@
 </template>
 
 <script setup>
-import { defineEmits } from "vue";
+import { defineEmits, inject } from "vue";
 
-const emit = defineEmits(["togglePopup"]);
+const eventBus = inject("eventBus");
+
+const emit = defineEmits(["addNewItem"]);
 
 function addNewItem() {
-  emit("togglePopup");
-
-  browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-    let currentTab = tabs[0];
-    if (!currentTab) {
-      return;
-    }
-    console.log("[pt2-popup] injecting inject.js in the current tab");
-    browser.scripting.executeScript({
-      target: {
-        tabId: currentTab.id,
-      },
-      files: ["inject.js"],
-    });
-  });
+  eventBus.emit("addNewItem", {});
 }
 </script>
 
