@@ -40,7 +40,8 @@ const orderedItemsList = computed(() => {
       let self = props.items[key];
       let linkedToItemIndex = orderedItems.findIndex((item) => item._key === linkedTo);
       if (linkedToItemIndex === -1) {
-        console.error(`[ItemList] linked item ${key} is linked to ${linkedTo}, but ${linkedTo} is not in the list`);
+        console.error(`[ItemList] linked item ${key} is linked to ${linkedTo}, but ${linkedTo} is not in the list. Removing it.`);
+        browser.storage.sync.remove(key);
         continue;
       }
       self._key = key;
