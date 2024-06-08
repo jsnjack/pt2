@@ -25,7 +25,7 @@ browser.runtime.onMessage.addListener(
             // The user wants to add the new item
             browser.action.setBadgeText({ text: "1" });
             // Generate unique id
-            let id = "" + new Date().getTime();
+            let id = "item-" + new Date().getTime();
             let obj = {};
             obj[id] = message.data;
             // Add new item to storage
