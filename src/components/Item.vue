@@ -90,6 +90,9 @@ const minCurrentPrice = computed(() => {
   let minPrice = extractPriceAndCurrency(props.item.currentValue);
   props.item._linked.forEach((linkedItem) => {
     let linkedItemPrice = extractPriceAndCurrency(linkedItem.currentValue);
+    if (linkedItemPrice === null) {
+      return;
+    }
     if (linkedItemPrice.price < minPrice.price) {
       minPrice = linkedItemPrice;
     }
