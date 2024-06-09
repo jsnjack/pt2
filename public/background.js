@@ -36,6 +36,9 @@ browser.runtime.onMessage.addListener(
 );
 
 function getTextContentRecursive(element) {
+    if (element === null) {
+        return "";
+    }
     let textContent = "";
     if (element.hasChildNodes()) {
         element.childNodes.forEach((child) => {
