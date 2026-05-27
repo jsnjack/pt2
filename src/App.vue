@@ -27,10 +27,10 @@ onMounted(() => {
   });
 
   // Watch storage updates
-  browser.storage.onChanged.addListener(function (changes, area) {
+  browser.storage.onChanged.addListener(function (changes) {
     console.log("[pt2-popup] storage changed: ", changes);
     for (let key in changes) {
-      eventBus.emit("itemUpdateFinished", { "key": key });
+      eventBus.emit("itemUpdateFinished", { key: key });
       if (changes[key].newValue) {
         itemsList.value[key] = changes[key].newValue;
       } else {
@@ -50,7 +50,7 @@ onMounted(() => {
       `[pt2-popup] asking background script to update ${payload.key}`,
     );
     portToBackground.postMessage({ signalID: "update-item", key: payload.key });
-    eventBus.emit("itemUpdateStarted", { "key": payload.key });
+    eventBus.emit("itemUpdateStarted", { key: payload.key });
   });
 
   eventBus.on("addNewItem", (payload) => {
@@ -62,7 +62,9 @@ onMounted(() => {
       if (!currentTab) {
         return;
       }
-      console.log(`[pt2-popup] injecting inject.js in the current tab (linked to ${payload.linkedTo})`);
+      console.log(
+        `[pt2-popup] injecting inject.js in the current tab (linked to ${payload.linkedTo})`,
+      );
       function setLinkedTo(linkedTo) {
         document.body.setAttribute("pt2-linked-to", linkedTo);
       }
@@ -96,6 +98,6 @@ onUnmounted(() => {
 <template>
   <main v-show="showPopup">
     <ItemList :items="itemsList" />
-    <FooterOverview @togglePopup="showPopup = false" />
+    <FooterOverview @toggle-popup="showPopup = false" />
   </main>
 </template>

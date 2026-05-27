@@ -24,8 +24,13 @@ function extractPriceAndCurrency(str) {
 
   // Check if currency string contains one of tthe recognized currency names
   // according to ISO 4217
-  for (const [currencyCode, currencySymbol] of Object.entries(currencySymbols)) {
-    if (currencyStr.includes(currencyCode) || currencyStr.includes(currencySymbol)) {
+  for (const [currencyCode, currencySymbol] of Object.entries(
+    currencySymbols,
+  )) {
+    if (
+      currencyStr.includes(currencyCode) ||
+      currencyStr.includes(currencySymbol)
+    ) {
       currency = currencySymbol.toUpperCase();
       foundCurrency = true;
       break;

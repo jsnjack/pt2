@@ -1,9 +1,9 @@
 <template>
   <div class="row item no-margin">
-    <div class="small-padding" @click="open" style="cursor: pointer">
+    <div class="small-padding" style="cursor: pointer" @click="open">
       <div>{{ hostname }}</div>
     </div>
-    <div class="small-padding max" style="text-align: right;">
+    <div class="small-padding max" style="text-align: right">
       <div class="large-text">{{ price }}</div>
     </div>
   </div>
@@ -44,6 +44,5 @@ function open() {
   browser.tabs.create({ url: props.item.url });
   window.close();
 }
-
 </script>
 <style scoped></style>

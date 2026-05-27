@@ -1,12 +1,20 @@
 <template>
-  <div class="medium-height middle-align center-align padding" style="background-color: var(--surface-container-lowest)"
-    v-if="Object.keys(props.items).length === 0">
+  <div
+    v-if="Object.keys(props.items).length === 0"
+    class="medium-height middle-align center-align padding"
+    style="background-color: var(--surface-container-lowest)"
+  >
     <div class="center-align">
       <i class="extra">orders</i>
       <h5>You have no items to track</h5>
     </div>
   </div>
-  <Item v-for="item in orderedItemsList" :key="item._key" :item="item" :itemKey="item._key" />
+  <Item
+    v-for="item in orderedItemsList"
+    :key="item._key"
+    :item="item"
+    :item-key="item._key"
+  />
 </template>
 
 <script setup>
@@ -38,9 +46,13 @@ const orderedItemsList = computed(() => {
     if (props.items[key].linkedTo !== "") {
       let linkedTo = props.items[key].linkedTo;
       let self = props.items[key];
-      let linkedToItemIndex = orderedItems.findIndex((item) => item._key === linkedTo);
+      let linkedToItemIndex = orderedItems.findIndex(
+        (item) => item._key === linkedTo,
+      );
       if (linkedToItemIndex === -1) {
-        console.error(`[ItemList] linked item ${key} is linked to ${linkedTo}, but ${linkedTo} is not in the list. Removing it.`);
+        console.error(
+          `[ItemList] linked item ${key} is linked to ${linkedTo}, but ${linkedTo} is not in the list. Removing it.`,
+        );
         browser.storage.sync.remove(key);
         continue;
       }

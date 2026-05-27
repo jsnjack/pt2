@@ -1,17 +1,25 @@
 <template>
   <div class="row item no-margin" :class="{ 'is-updating': isUpdating }">
-    <div class="small-padding" @click="open" style="cursor: pointer">
+    <div class="small-padding" style="cursor: pointer" @click="open">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
     </div>
     <!--    There is no change -->
-    <div v-if="!diff.changed" class="small-padding max" style="text-align: right;">
+    <div
+      v-if="!diff.changed"
+      class="small-padding max"
+      style="text-align: right"
+    >
       <div class="large-text">{{ diff.current }}</div>
     </div>
     <!-- There is a change -->
     <!-- Percentage -->
-    <div v-if="diff.changed" class="small-padding" style="text-align: left; min-width: 100px;"
-      :style="'background-color: ' + changeBackground + ';'">
+    <div
+      v-if="diff.changed"
+      class="small-padding"
+      style="text-align: left; min-width: 100px"
+      :style="'background-color: ' + changeBackground + ';'"
+    >
       <div class="large-text bold" :style="'color: ' + 'white'">
         {{ relativeDiffText }}
       </div>
@@ -20,7 +28,11 @@
       </div>
     </div>
     <!-- Comparing old and new -->
-    <div v-if="diff.changed" class="small-padding max" style="text-align: right;">
+    <div
+      v-if="diff.changed"
+      class="small-padding max"
+      style="text-align: right"
+    >
       <div class="large-text">{{ diff.current }}</div>
       <div class="overline small-text">{{ diff.initial }}</div>
     </div>
@@ -33,8 +45,11 @@
   </div>
 
   <div v-show="showBottomMenu" class="row item no-margin">
-    <div class="field label border small max" style="margin-left: 10px; margin-right: 10px;">
-      <input type="text" class="small" v-model="newTitle" />
+    <div
+      class="field label border small max"
+      style="margin-left: 10px; margin-right: 10px"
+    >
+      <input v-model="newTitle" type="text" class="small" />
       <label>Rename item</label>
     </div>
   </div>
@@ -50,18 +65,28 @@
     </div>
   </div>
 
-  <LinkedItem v-show="showBottomMenu" v-for="linkedItem in props.item._linked" :key="linkedItem._key" :item="linkedItem"
-    :itemKey="linkedItem._key" />
+  <LinkedItem
+    v-for="linkedItem in props.item._linked"
+    v-show="showBottomMenu"
+    :key="linkedItem._key"
+    :item="linkedItem"
+    :item-key="linkedItem._key"
+  />
 </template>
 
 <script setup>
 import { extractPriceAndCurrency } from "@/assets/prices";
-import { computed, defineEmits, defineProps, inject, onBeforeUnmount, onMounted, ref } from "vue";
+import {
+  computed,
+  defineProps,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+} from "vue";
 import LinkedItem from "./LinkedItem.vue";
 
 const eventBus = inject("eventBus");
-
-const emit = defineEmits(["updateItem", "addNewItem"]);
 
 const props = defineProps({
   item: {
@@ -188,7 +213,7 @@ function deleteItem() {
 }
 
 function addLinkedItem() {
-  eventBus.emit("addNewItem", { "linkedTo": props.itemKey });
+  eventBus.emit("addNewItem", { linkedTo: props.itemKey });
 }
 
 function toggleBottomMenu() {
@@ -216,9 +241,9 @@ function doRename() {
 onMounted(() => {
   eventBus.on("itemUpdateStarted", itemUpdateStartedHandler);
   eventBus.on("itemUpdateFinished", itemUpdateFinishedHandler);
-  eventBus.emit("updateItem", { "key": props.itemKey });
+  eventBus.emit("updateItem", { key: props.itemKey });
   props.item._linked.forEach((linkedItem) => {
-    eventBus.emit("updateItem", { "key": linkedItem._key });
+    eventBus.emit("updateItem", { key: linkedItem._key });
   });
   newTitle.value = props.item.title;
 });

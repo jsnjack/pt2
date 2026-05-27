@@ -1,141 +1,155 @@
-/*globals self, document, window */
 (function () {
-    const cssClassRegex = /^[a-zA-Z0-9_-]+$/;
+  const cssClassRegex = /^[a-zA-Z0-9_-]+$/;
 
-    function pt_sendSignal(signal_id, data) {
-        // Send signal to main function
-        console.log(`[pt2-inject] sending signal ${signal_id}`, data);
-        browser.runtime.sendMessage({
-            signalID: signal_id,
-            data: data
-        });
+  function pt_sendSignal(signal_id, data) {
+    // Send signal to main function
+    console.log(`[pt2-inject] sending signal ${signal_id}`, data);
+    browser.runtime.sendMessage({
+      signalID: signal_id,
+      data: data,
+    });
+  }
+
+  //##### Get unique selector block #####
+  function pt_positionInNodeList(element, nodeList) {
+    // Helper for getUniqueSelector function
+    for (var i = 0; i < nodeList.length; i = i + 1) {
+      if (element === nodeList[i]) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function pt_getUniqueSelector(element) {
+    // Returns unique selector for element. Element can be received black
+    // with querySelector
+    var tagName = element.localName,
+      selector,
+      index,
+      matches;
+    // document.querySelectorAll("#id") returns multiple if elements share an ID
+    if (
+      element.id &&
+      document.querySelectorAll("#" + element.id).length === 1
+    ) {
+      return "#" + element.id;
+    }
+    // Inherently unique by tag name
+
+    if (tagName === "html") {
+      return "html";
+    }
+    if (tagName === "head") {
+      return "head";
+    }
+    if (tagName === "body") {
+      return "body";
     }
 
-    //##### Get unique selector block #####
-    function pt_positionInNodeList(element, nodeList) {
-        // Helper for getUniqueSelector function
-        for (var i = 0; i < nodeList.length; i = i + 1) {
-            if (element === nodeList[i]) {
-                return i;
-            }
+    // We might be able to find a unique class name
+    if (element.classList.length > 0) {
+      for (var i = 0; i < element.classList.length; i = i + 1) {
+        // Is this className unique by itself?
+        const className = element.classList.item(i);
+        selector = "." + className;
+        // Only accept very simple class names, to make sure the invalid
+        // selector is not returned.
+        if (!cssClassRegex.test(className)) {
+          continue;
         }
-        return - 1;
-    }
-
-    function pt_getUniqueSelector(element) {
-        // Returns unique selector for element. Element can be received black
-        // with querySelector
-        var tagName = element.localName,
-            selector, index, matches;
-        // document.querySelectorAll("#id") returns multiple if elements share an ID
-        if (element.id && document.querySelectorAll('#' + element.id).length === 1) {
-            return '#' + element.id;
+        matches = document.querySelectorAll(selector);
+        if (matches.length === 1) {
+          return selector;
         }
-        // Inherently unique by tag name
+        // Maybe it's unique with a tag name?
 
-        if (tagName === 'html') {
-            return 'html';
+        selector = tagName + selector;
+        matches = document.querySelectorAll(selector);
+        if (matches.length === 1) {
+          return selector;
         }
-        if (tagName === 'head') {
-            return 'head';
+        // Maybe it's unique using a tag name and nth-child
+
+        index = pt_positionInNodeList(element, element.parentNode.children) + 1;
+        selector = selector + ":nth-child(" + index + ")";
+        matches = document.querySelectorAll(selector);
+        if (matches.length === 1) {
+          return selector;
         }
-        if (tagName === 'body') {
-            return 'body';
-        }
-
-        // We might be able to find a unique class name
-        if (element.classList.length > 0) {
-            for (var i = 0; i < element.classList.length; i = i + 1) {
-                // Is this className unique by itself?
-                selector = '.' + element.classList.item(i);
-                // Only accept very simple class names, to make sure the invalid
-                // selector is not returned.
-                if (!cssClassRegex.test(selector)) {
-                    continue;
-                }
-                matches = document.querySelectorAll(selector);
-                if (matches.length === 1) {
-                    return selector;
-                }
-                // Maybe it's unique with a tag name?
-
-                selector = tagName + selector;
-                matches = document.querySelectorAll(selector);
-                if (matches.length === 1) {
-                    return selector;
-                }
-                // Maybe it's unique using a tag name and nth-child
-
-                index = pt_positionInNodeList(element, element.parentNode.children) + 1;
-                selector = selector + ':nth-child(' + index + ')';
-                matches = document.querySelectorAll(selector);
-                if (matches.length === 1) {
-                    return selector;
-                }
-            }
-        }
-        // Not unique enough yet.  As long as it's not a child of the document,
-        // continue recursing up until it is unique enough.
-
-        if (element.parentNode !== document) {
-            index = pt_positionInNodeList(element, element.parentNode.children) + 1;
-            selector = pt_getUniqueSelector(element.parentNode) + ' > ' +
-                tagName + ':nth-child(' + index + ')';
-        }
-        return selector;
+      }
     }
-    //##### END of Get unique selector block #####
+    // Not unique enough yet.  As long as it's not a child of the document,
+    // continue recursing up until it is unique enough.
 
-    function pt_clear_injection() {
-        // Disable all injected events and remove injected styles
-        document.getElementsByTagName("head")[0].removeChild(style);
-        document.removeEventListener("mouseover", pt_add_highlighter);
-        document.removeEventListener("click", pt_select_item);
+    if (element.parentNode !== document) {
+      index = pt_positionInNodeList(element, element.parentNode.children) + 1;
+      selector =
+        pt_getUniqueSelector(element.parentNode) +
+        " > " +
+        tagName +
+        ":nth-child(" +
+        index +
+        ")";
     }
+    return selector;
+  }
+  //##### END of Get unique selector block #####
 
-    function pt_remove_highlighter(event) {
-        event.target.classList.remove("pt-highlight");
-        event.target.removeEventListener("mouseout", pt_remove_highlighter);
-    }
+  function pt_clear_injection() {
+    // Disable all injected events and remove injected styles
+    document.getElementsByTagName("head")[0].removeChild(style);
+    document.removeEventListener("mouseover", pt_add_highlighter);
+    document.removeEventListener("click", pt_select_item);
+  }
 
-    function pt_add_highlighter(event) {
-        // Highlight selected element (like Dev tools do)
-        event.target.classList.add("pt-highlight");
-        event.target.addEventListener("mouseout", pt_remove_highlighter);
-    }
+  function pt_remove_highlighter(event) {
+    event.target.classList.remove("pt-highlight");
+    event.target.removeEventListener("mouseout", pt_remove_highlighter);
+  }
 
-    function pt_select_item(event) {
-        // Catch item and send data to main.js
-        var element = event.target;
-        element.classList.remove(pt_highlight_class);
-        element.removeEventListener("mouseout", pt_remove_highlighter);
-        let payload = {
-            "url": window.location.href,
-            "selector": pt_getUniqueSelector(element),
-            "title": document.title,
-            "initialValue": "",
-            "currentValue": "",
-            "lastUpdate": new Date().getTime(),
-            "linkedTo": document.body.getAttribute("pt2-linked-to") || "",
-        };
-        pt_sendSignal("inject-return-data", payload);
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        // Remove all injected changes
-        pt_clear_injection();
-    }
+  function pt_add_highlighter(event) {
+    // Highlight selected element (like Dev tools do)
+    event.target.classList.add("pt-highlight");
+    event.target.addEventListener("mouseout", pt_remove_highlighter);
+  }
 
+  function pt_select_item(event) {
+    // Catch item and send data to main.js
+    var element = event.target;
+    element.classList.remove(pt_highlight_class);
+    element.removeEventListener("mouseout", pt_remove_highlighter);
+    let payload = {
+      url: window.location.href,
+      selector: pt_getUniqueSelector(element),
+      title: document.title,
+      initialValue: "",
+      currentValue: "",
+      lastUpdate: new Date().getTime(),
+      linkedTo: document.body.getAttribute("pt2-linked-to") || "",
+    };
+    pt_sendSignal("inject-return-data", payload);
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    // Remove all injected changes
+    pt_clear_injection();
+  }
 
-    // Highlight selected element style
-    var style = document.createElement("style"),
-        pt_highlight_class = "pt-highlight";
-    document.getElementsByTagName("head")[0].appendChild(style);
-    if (style.sheet) {
-        style.sheet.insertRule("." + pt_highlight_class + "{background: #f5ecb1;outline: dashed black 2px;}", 0);
-    }
+  // Highlight selected element style
+  var style = document.createElement("style"),
+    pt_highlight_class = "pt-highlight";
+  document.getElementsByTagName("head")[0].appendChild(style);
+  if (style.sheet) {
+    style.sheet.insertRule(
+      "." +
+        pt_highlight_class +
+        "{background: #f5ecb1;outline: dashed black 2px;}",
+      0,
+    );
+  }
 
-    // Add events to catch item
-    document.addEventListener("mouseover", pt_add_highlighter);
-    document.addEventListener("click", pt_select_item);
+  // Add events to catch item
+  document.addEventListener("mouseover", pt_add_highlighter);
+  document.addEventListener("click", pt_select_item);
 })();

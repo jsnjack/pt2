@@ -1,7 +1,7 @@
 <template>
   <div class="small-padding footer">
     <nav>
-      <button @click="addNewItem" class="small">
+      <button class="small" @click="addNewItem">
         <i>add</i>
         <span>Add</span>
       </button>
@@ -12,11 +12,9 @@
 </template>
 
 <script setup>
-import { defineEmits, inject } from "vue";
+import { inject } from "vue";
 
 const eventBus = inject("eventBus");
-
-const emit = defineEmits(["addNewItem"]);
 
 function addNewItem() {
   eventBus.emit("addNewItem", {});
