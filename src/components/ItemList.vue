@@ -29,8 +29,10 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from "vue";
+import { computed, defineEmits, defineProps, watch } from "vue";
 import Item from "./Item.vue";
+
+const emit = defineEmits(["visibleItemsChange"]);
 
 const props = defineProps({
   items: {
@@ -140,6 +142,34 @@ const orderedItemsList = computed(() => {
     return a.title.localeCompare(b.title);
   });
 });
+
+const visibleItemUrls = computed(() => {
+  const urls = [];
+  const seenUrls = new Set();
+
+  orderedItemsList.value.forEach((item) => {
+    const visibleItems = isFiltering.value ? [item, ...item._linked] : [item];
+
+    visibleItems.forEach((visibleItem) => {
+      if (!visibleItem.url || seenUrls.has(visibleItem.url)) {
+        return;
+      }
+
+      seenUrls.add(visibleItem.url);
+      urls.push(visibleItem.url);
+    });
+  });
+
+  return urls;
+});
+
+watch(
+  visibleItemUrls,
+  (urls) => {
+    emit("visibleItemsChange", urls);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>

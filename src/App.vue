@@ -4,7 +4,7 @@ import "beercss";
 import FooterOverview from "./components/FooterOverview.vue";
 import ItemList from "./components/ItemList.vue";
 
-import { inject, onMounted, onUnmounted, ref } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref } from "vue";
 
 const eventBus = inject("eventBus");
 
@@ -13,6 +13,15 @@ let portToBackground = null;
 const showPopup = ref(true);
 const itemsList = ref({});
 const filterQuery = ref("");
+const visibleItemUrls = ref([]);
+
+const openVisibleTitle = computed(() => {
+  const count = visibleItemUrls.value.length;
+  if (count === 0) {
+    return "No visible links";
+  }
+  return `Open ${count} visible ${count === 1 ? "link" : "links"}`;
+});
 
 onMounted(() => {
   // Reset badge text
@@ -94,6 +103,16 @@ onUnmounted(() => {
     portToBackground = null;
   }
 });
+
+function setVisibleItemUrls(urls) {
+  visibleItemUrls.value = urls;
+}
+
+function openVisibleItems() {
+  visibleItemUrls.value.forEach((url) => {
+    browser.tabs.create({ active: false, url });
+  });
+}
 </script>
 
 <template>
@@ -117,8 +136,28 @@ onUnmounted(() => {
           <i>close</i>
         </button>
       </label>
+      <button
+        :aria-label="openVisibleTitle"
+        class="transparent open-visible-button"
+        :disabled="visibleItemUrls.length === 0"
+        :title="openVisibleTitle"
+        type="button"
+        @click="openVisibleItems"
+      >
+        <i>open_in_new</i>
+        <span
+          v-if="filterQuery && visibleItemUrls.length > 0"
+          class="small-text"
+        >
+          {{ visibleItemUrls.length }}
+        </span>
+      </button>
     </div>
-    <ItemList :filter-query="filterQuery" :items="itemsList" />
+    <ItemList
+      :filter-query="filterQuery"
+      :items="itemsList"
+      @visible-items-change="setVisibleItemUrls"
+    />
     <FooterOverview @toggle-popup="showPopup = false" />
   </main>
 </template>
@@ -131,7 +170,10 @@ onUnmounted(() => {
 }
 
 .filter-bar {
+  align-items: center;
   background-color: var(--surface-container-lowest);
+  display: flex;
+  gap: 6px;
   padding: 6px 8px 4px;
 }
 
@@ -144,6 +186,8 @@ onUnmounted(() => {
   gap: 6px;
   height: 32px;
   padding: 0 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .filter-field > i {
@@ -166,5 +210,23 @@ onUnmounted(() => {
   inline-size: 24px;
   min-block-size: 24px;
   min-inline-size: 24px;
+}
+
+.open-visible-button {
+  align-items: center;
+  block-size: 32px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 6px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  inline-size: auto;
+  min-block-size: 32px;
+  min-inline-size: 32px;
+  padding: 0 6px;
+}
+
+.open-visible-button > i {
+  font-size: 18px;
 }
 </style>
