@@ -24,5 +24,6 @@ function addNewItem() {
 <style scoped>
 .footer {
   background-color: var(--primary-container);
+  flex: 0 0 auto;
 }
 </style>

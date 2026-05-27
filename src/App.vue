@@ -97,21 +97,26 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main v-show="showPopup">
-    <div class="small-padding filter-bar">
-      <div class="field prefix suffix border small no-margin">
+  <main v-show="showPopup" class="popup-shell">
+    <div class="filter-bar">
+      <label class="filter-field">
         <i>search</i>
-        <input v-model="filterQuery" type="search" />
+        <input
+          v-model="filterQuery"
+          aria-label="Filter items"
+          placeholder="Filter"
+          type="search"
+        />
         <button
           v-if="filterQuery"
-          class="transparent circle"
+          aria-label="Clear filter"
+          class="small transparent circle"
           type="button"
           @click="filterQuery = ''"
         >
           <i>close</i>
         </button>
-        <label>Filter items</label>
-      </div>
+      </label>
     </div>
     <ItemList :filter-query="filterQuery" :items="itemsList" />
     <FooterOverview @toggle-popup="showPopup = false" />
@@ -119,7 +124,47 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.popup-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+
 .filter-bar {
   background-color: var(--surface-container-lowest);
+  padding: 6px 8px 4px;
+}
+
+.filter-field {
+  align-items: center;
+  background-color: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  border-radius: 6px;
+  display: flex;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px;
+}
+
+.filter-field > i {
+  font-size: 18px;
+}
+
+.filter-field > input {
+  background: transparent;
+  border: 0;
+  flex: 1;
+  font: inherit;
+  height: 100%;
+  min-width: 0;
+  outline: 0;
+  padding: 0;
+}
+
+.filter-field > button {
+  block-size: 24px;
+  inline-size: 24px;
+  min-block-size: 24px;
+  min-inline-size: 24px;
 }
 </style>

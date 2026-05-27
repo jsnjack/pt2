@@ -1,31 +1,31 @@
 <template>
-  <div
-    v-if="Object.keys(props.items).length === 0"
-    class="medium-height middle-align center-align padding"
-    style="background-color: var(--surface-container-lowest)"
-  >
-    <div class="center-align">
-      <i class="extra">orders</i>
-      <h5>You have no items to track</h5>
+  <section class="item-list">
+    <div
+      v-if="Object.keys(props.items).length === 0"
+      class="empty-state middle-align center-align padding"
+    >
+      <div class="center-align">
+        <i class="extra">orders</i>
+        <h5>You have no items to track</h5>
+      </div>
     </div>
-  </div>
-  <div
-    v-else-if="orderedItemsList.length === 0"
-    class="medium-height middle-align center-align padding"
-    style="background-color: var(--surface-container-lowest)"
-  >
-    <div class="center-align">
-      <i class="extra">search_off</i>
-      <h5>No matching items</h5>
+    <div
+      v-else-if="orderedItemsList.length === 0"
+      class="empty-state middle-align center-align padding"
+    >
+      <div class="center-align">
+        <i class="extra">search_off</i>
+        <h5>No matching items</h5>
+      </div>
     </div>
-  </div>
-  <Item
-    v-for="item in orderedItemsList"
-    :key="item._key"
-    :force-show-linked="isFiltering"
-    :item="item"
-    :item-key="item._key"
-  />
+    <Item
+      v-for="item in orderedItemsList"
+      :key="item._key"
+      :force-show-linked="isFiltering"
+      :item="item"
+      :item-key="item._key"
+    />
+  </section>
 </template>
 
 <script setup>
@@ -139,4 +139,15 @@ const orderedItemsList = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.item-list {
+  background-color: var(--surface-container-lowest);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.empty-state {
+  min-height: 260px;
+}
+</style>
