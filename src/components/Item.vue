@@ -1,5 +1,10 @@
 <template>
-  <div class="row item no-margin" :class="{ 'is-updating': isUpdating }">
+  <div
+    class="row item no-margin"
+    :class="{ 'is-updating': isUpdating }"
+    @auxclick.middle.prevent.stop="openWithoutClosing"
+    @mousedown.middle.prevent.stop
+  >
     <div class="small-padding" style="cursor: pointer" @click="open">
       <div class="crop-text">{{ props.item.title }}</div>
       <div class="small-text">{{ hostname }}</div>
@@ -206,6 +211,10 @@ const changeBackground = computed(() => {
 function open() {
   browser.tabs.create({ url: props.item.url });
   window.close();
+}
+
+function openWithoutClosing() {
+  browser.tabs.create({ active: false, url: props.item.url });
 }
 
 function deleteItem() {

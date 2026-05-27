@@ -1,5 +1,9 @@
 <template>
-  <div class="row item no-margin">
+  <div
+    class="row item no-margin"
+    @auxclick.middle.prevent.stop="openWithoutClosing"
+    @mousedown.middle.prevent.stop
+  >
     <div class="small-padding" style="cursor: pointer" @click="open">
       <div>{{ hostname }}</div>
     </div>
@@ -43,6 +47,10 @@ const price = computed(() => {
 function open() {
   browser.tabs.create({ url: props.item.url });
   window.close();
+}
+
+function openWithoutClosing() {
+  browser.tabs.create({ active: false, url: props.item.url });
 }
 </script>
 <style scoped></style>
