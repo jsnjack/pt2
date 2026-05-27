@@ -17,13 +17,20 @@
     <div class="small-padding max" style="text-align: right">
       <div class="large-text">{{ price }}</div>
     </div>
+    <div class="small-padding">
+      <button class="small circle transparent" @click.stop="retargetItem">
+        <i>my_location</i>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { extractPriceAndCurrency } from "@/assets/prices";
 import { mergeDraggedItemInto, startItemDrag } from "@/itemDragDrop";
-import { computed, defineProps, ref } from "vue";
+import { computed, defineProps, inject, ref } from "vue";
+
+const eventBus = inject("eventBus");
 
 const props = defineProps({
   item: {
@@ -78,6 +85,10 @@ function finishDrag() {
 async function dropItem(event) {
   finishDrag();
   await mergeDraggedItemInto(event, props.itemKey);
+}
+
+function retargetItem() {
+  eventBus.emit("retargetItem", { key: props.itemKey });
 }
 </script>
 <style scoped>

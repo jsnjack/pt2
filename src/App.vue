@@ -67,31 +67,19 @@ onMounted(() => {
     console.log("[pt2-popup] asking background script to add a new item");
     showPopup.value = false;
 
-    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      let currentTab = tabs[0];
-      if (!currentTab) {
-        return;
-      }
-      console.log(
-        `[pt2-popup] injecting inject.js in the current tab (linked to ${payload.linkedTo})`,
-      );
-      function setLinkedTo(linkedTo) {
-        document.body.setAttribute("pt2-linked-to", linkedTo);
-      }
-      browser.scripting.executeScript({
-        target: {
-          tabId: currentTab.id,
-        },
-        func: setLinkedTo,
-        args: [payload.linkedTo || ""],
-      });
+    injectSelectorPicker({
+      linkedTo: payload.linkedTo || "",
+      retargetKey: "",
+    });
+  });
 
-      browser.scripting.executeScript({
-        target: {
-          tabId: currentTab.id,
-        },
-        files: ["inject.js"],
-      });
+  eventBus.on("retargetItem", (payload) => {
+    console.log(`[pt2-popup] asking content script to retarget ${payload.key}`);
+    showPopup.value = false;
+
+    injectSelectorPicker({
+      linkedTo: "",
+      retargetKey: payload.key,
     });
   });
 });
@@ -111,6 +99,36 @@ function setVisibleItemUrls(urls) {
 function openVisibleItems() {
   visibleItemUrls.value.forEach((url) => {
     browser.tabs.create({ active: false, url });
+  });
+}
+
+function injectSelectorPicker({ linkedTo, retargetKey }) {
+  browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    let currentTab = tabs[0];
+    if (!currentTab) {
+      return;
+    }
+    console.log(
+      `[pt2-popup] injecting inject.js in the current tab (linked to ${linkedTo}, retarget ${retargetKey})`,
+    );
+    function setPickerState(linkedToValue, retargetKeyValue) {
+      document.body.setAttribute("pt2-linked-to", linkedToValue);
+      document.body.setAttribute("pt2-retarget-key", retargetKeyValue);
+    }
+    browser.scripting.executeScript({
+      target: {
+        tabId: currentTab.id,
+      },
+      func: setPickerState,
+      args: [linkedTo, retargetKey],
+    });
+
+    browser.scripting.executeScript({
+      target: {
+        tabId: currentTab.id,
+      },
+      files: ["inject.js"],
+    });
   });
 }
 </script>

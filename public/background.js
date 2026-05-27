@@ -21,16 +21,58 @@ browser.runtime.onConnect.addListener(function (port) {
 
 browser.runtime.onMessage.addListener(function (message) {
   if (message.signalID === "inject-return-data") {
-    // The user wants to add the new item
     browser.action.setBadgeText({ text: "1" });
-    // Generate unique id
-    let id = "item-" + new Date().getTime();
-    let obj = {};
-    obj[id] = message.data;
-    // Add new item to storage
-    browser.storage.sync.set(obj);
+    if (message.data.retargetKey) {
+      retargetItem(message.data.retargetKey, message.data);
+    } else {
+      // Generate unique id
+      let id = "item-" + new Date().getTime();
+      let obj = {};
+      obj[id] = normalizeInjectedItem(message.data);
+      // Add new item to storage
+      browser.storage.sync.set(obj);
+    }
   }
 });
+
+function normalizeInjectedItem(item) {
+  const timestamp = new Date().getTime();
+  return {
+    url: item.url,
+    selector: item.selector,
+    title: item.title,
+    linkedTo: item.linkedTo || "",
+    pinned: item.pinned || false,
+    initialValue: item.initialValue || item.currentValue || "",
+    currentValue: item.currentValue || "",
+    history: buildHistory(item, item.currentValue || "", timestamp),
+    lastUpdate: timestamp,
+  };
+}
+
+function retargetItem(key, data) {
+  browser.storage.sync.get(key).then(function (result) {
+    const item = result[key];
+    if (!item) {
+      return;
+    }
+
+    const timestamp = new Date().getTime();
+    browser.storage.sync.set({
+      [key]: {
+        url: data.url,
+        selector: data.selector,
+        title: item.title || data.title,
+        linkedTo: item.linkedTo || "",
+        pinned: item.pinned || false,
+        initialValue: item.initialValue || data.currentValue || "",
+        currentValue: data.currentValue || "",
+        history: buildHistory(item, data.currentValue || "", timestamp),
+        lastUpdate: timestamp,
+      },
+    });
+  });
+}
 
 function getTextContentRecursive(element) {
   if (element === null) {

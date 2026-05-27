@@ -96,11 +96,32 @@
   }
   //##### END of Get unique selector block #####
 
+  function pt_getTextContent(element) {
+    return element.textContent.trim();
+  }
+
   function pt_clear_injection() {
-    // Disable all injected events and remove injected styles
-    document.getElementsByTagName("head")[0].removeChild(style);
+    document.querySelectorAll("." + pt_highlight_class).forEach((element) => {
+      element.classList.remove(pt_highlight_class);
+      element.removeEventListener("mouseout", pt_remove_highlighter);
+    });
+    if (style.parentNode) {
+      style.parentNode.removeChild(style);
+    }
+    document.body.removeAttribute("pt2-linked-to");
+    document.body.removeAttribute("pt2-retarget-key");
     document.removeEventListener("mouseover", pt_add_highlighter);
     document.removeEventListener("click", pt_select_item);
+    document.removeEventListener("keydown", pt_cancel_selection);
+  }
+
+  function pt_cancel_selection(event) {
+    if (event.key !== "Escape") {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    pt_clear_injection();
   }
 
   function pt_remove_highlighter(event) {
@@ -119,14 +140,16 @@
     var element = event.target;
     element.classList.remove(pt_highlight_class);
     element.removeEventListener("mouseout", pt_remove_highlighter);
+    const currentValue = pt_getTextContent(element);
     let payload = {
       url: window.location.href,
       selector: pt_getUniqueSelector(element),
       title: document.title,
-      initialValue: "",
-      currentValue: "",
+      initialValue: currentValue,
+      currentValue: currentValue,
       lastUpdate: new Date().getTime(),
       linkedTo: document.body.getAttribute("pt2-linked-to") || "",
+      retargetKey: document.body.getAttribute("pt2-retarget-key") || "",
     };
     pt_sendSignal("inject-return-data", payload);
     event.preventDefault();
@@ -152,4 +175,5 @@
   // Add events to catch item
   document.addEventListener("mouseover", pt_add_highlighter);
   document.addEventListener("click", pt_select_item);
+  document.addEventListener("keydown", pt_cancel_selection);
 })();

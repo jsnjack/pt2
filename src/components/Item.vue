@@ -86,6 +86,9 @@
       <button class="small circle transparent" @click="addLinkedItem">
         <i>library_add</i>
       </button>
+      <button class="small circle transparent" @click="retargetItem">
+        <i>my_location</i>
+      </button>
       <button class="small circle transparent" @click="deleteItem">
         <i>delete</i>
       </button>
@@ -297,6 +300,10 @@ function deleteItem() {
 
 function addLinkedItem() {
   eventBus.emit("addNewItem", { linkedTo: props.itemKey });
+}
+
+function retargetItem() {
+  eventBus.emit("retargetItem", { key: props.itemKey });
 }
 
 function toggleBottomMenu() {
