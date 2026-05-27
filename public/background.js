@@ -89,6 +89,7 @@ function updateItem(key) {
             selector: item.selector,
             title: item.title,
             linkedTo: item.linkedTo || "",
+            pinned: item.pinned || false,
             initialValue: item.initialValue || value,
             currentValue: value,
             lastUpdate: new Date().getTime(),

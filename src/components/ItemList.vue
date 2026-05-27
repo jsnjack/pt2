@@ -134,6 +134,9 @@ const orderedItemsList = computed(() => {
   }
 
   return orderedItems.sort((a, b) => {
+    if (a.pinned !== b.pinned) {
+      return a.pinned ? -1 : 1;
+    }
     return a.title.localeCompare(b.title);
   });
 });

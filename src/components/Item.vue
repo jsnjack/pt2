@@ -11,8 +11,24 @@
     @drop.prevent.stop="dropItem"
     @mousedown.middle.prevent.stop
   >
-    <div class="small-padding" style="cursor: pointer" @click="open">
-      <div class="crop-text">{{ props.item.title }}</div>
+    <div
+      class="small-padding item-summary"
+      style="cursor: pointer"
+      @click="open"
+    >
+      <div class="title-line">
+        <button
+          :aria-label="props.item.pinned ? 'Unpin item' : 'Pin item'"
+          class="transparent pin-button"
+          :class="{ 'is-pinned': props.item.pinned }"
+          type="button"
+          @click.prevent.stop="togglePinned"
+          @mousedown.stop
+        >
+          <i>{{ props.item.pinned ? "star" : "star_border" }}</i>
+        </button>
+        <div class="crop-text">{{ props.item.title }}</div>
+      </div>
       <div class="small-text">{{ hostname }}</div>
     </div>
     <!--    There is no change -->
@@ -265,15 +281,24 @@ function doRename() {
   }
   let obj = { ...props.item };
   obj.title = newTitle.value;
-  // delete all keys which start with underscore
-  for (let key in obj) {
-    if (key.startsWith("_")) {
-      delete obj[key];
-    }
-  }
   browser.storage.sync.set({
-    [props.itemKey]: obj,
+    [props.itemKey]: removePrivateFields(obj),
   });
+}
+
+function togglePinned() {
+  browser.storage.sync.set({
+    [props.itemKey]: removePrivateFields({
+      ...props.item,
+      pinned: !props.item.pinned,
+    }),
+  });
+}
+
+function removePrivateFields(item) {
+  return Object.fromEntries(
+    Object.entries(item).filter(([key]) => !key.startsWith("_")),
+  );
 }
 
 onMounted(() => {
@@ -306,10 +331,22 @@ function itemUpdateFinishedHandler(payload) {
 
 <style scoped>
 .crop-text {
-  width: 250px;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.item-summary {
+  min-width: 0;
+  width: 250px;
+}
+
+.title-line {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+  min-width: 0;
 }
 
 .item {
@@ -323,5 +360,37 @@ function itemUpdateFinishedHandler(payload) {
 .is-drag-over {
   outline: 2px dashed var(--primary);
   outline-offset: -2px;
+}
+
+.pin-button.is-pinned {
+  background-color: transparent;
+  color: var(--primary);
+}
+
+.pin-button.is-pinned > i {
+  font-variation-settings: "FILL" 1;
+}
+
+.pin-button {
+  align-items: center;
+  block-size: 14px;
+  border-radius: 3px;
+  display: inline-flex;
+  inline-size: 14px;
+  justify-content: center;
+  margin-left: -6px;
+  min-block-size: 14px;
+  min-inline-size: 14px;
+  opacity: 0.55;
+  padding: 0;
+}
+
+.pin-button.is-pinned,
+.pin-button:hover {
+  opacity: 1;
+}
+
+.pin-button > i {
+  font-size: 14px;
 }
 </style>
