@@ -49,6 +49,23 @@ function getTextContentRecursive(element) {
   return textContent;
 }
 
+function buildHistory(item, value, timestamp) {
+  const history = Array.isArray(item.history) ? item.history : [];
+  const latestValue = history[0]?.value;
+
+  if (latestValue === value) {
+    return history;
+  }
+
+  return [
+    {
+      timestamp,
+      value,
+    },
+    ...history,
+  ].slice(0, 20);
+}
+
 function updateItem(key) {
   console.log(`[pt2-background-${key}] Updating item ...`);
   browser.storage.sync.get(key).then(function (result) {
@@ -83,6 +100,7 @@ function updateItem(key) {
             }
           }
           let obj = {};
+          const timestamp = new Date().getTime();
           // API updates item in storage
           obj[key] = {
             url: item.url,
@@ -92,7 +110,8 @@ function updateItem(key) {
             pinned: item.pinned || false,
             initialValue: item.initialValue || value,
             currentValue: value,
-            lastUpdate: new Date().getTime(),
+            history: buildHistory(item, value, timestamp),
+            lastUpdate: timestamp,
           };
           console.log(`[pt2-background-${key}] Updating storage to:`, obj);
           browser.storage.sync.set(obj);

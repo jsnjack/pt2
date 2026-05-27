@@ -92,6 +92,18 @@
     </div>
   </div>
 
+  <div v-if="showBottomMenu && historyEntries.length > 0" class="history-panel">
+    <div class="small-text history-title">History</div>
+    <div
+      v-for="entry in historyEntries"
+      :key="entry.timestamp"
+      class="history-entry"
+    >
+      <span class="small-text">{{ entry.time }}</span>
+      <span class="history-value">{{ entry.value }}</span>
+    </div>
+  </div>
+
   <LinkedItem
     v-for="linkedItem in props.item._linked"
     v-show="showBottomMenu || props.forceShowLinked"
@@ -234,6 +246,23 @@ const changeBackground = computed(() => {
     }
   }
   return "";
+});
+
+const historyEntries = computed(() => {
+  if (!Array.isArray(props.item.history)) {
+    return [];
+  }
+
+  return props.item.history.slice(0, 5).map((entry) => {
+    return {
+      timestamp: entry.timestamp,
+      time: new Date(entry.timestamp).toLocaleString([], {
+        day: "2-digit",
+        month: "short",
+      }),
+      value: entry.value,
+    };
+  });
 });
 
 function open() {
@@ -392,5 +421,31 @@ function itemUpdateFinishedHandler(payload) {
 
 .pin-button > i {
   font-size: 14px;
+}
+
+.history-panel {
+  background-color: var(--surface-container-lowest);
+  border-top: 1px solid var(--outline-variant);
+  padding: 6px 10px 8px;
+}
+
+.history-title {
+  color: var(--on-surface-variant);
+  margin-bottom: 2px;
+}
+
+.history-entry {
+  align-items: baseline;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  min-height: 20px;
+}
+
+.history-value {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
