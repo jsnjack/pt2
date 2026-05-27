@@ -1,8 +1,14 @@
 <template>
   <div
     class="row item no-margin"
-    :class="{ 'is-updating': isUpdating }"
+    :class="{ 'is-drag-over': isDragOver, 'is-updating': isUpdating }"
+    draggable="true"
     @auxclick.middle.prevent.stop="openWithoutClosing"
+    @dragend="finishDrag"
+    @dragleave="finishDrag"
+    @dragover.prevent="showDropTarget"
+    @dragstart.stop="startDrag"
+    @drop.prevent.stop="dropItem"
     @mousedown.middle.prevent.stop
   >
     <div class="small-padding" style="cursor: pointer" @click="open">
@@ -81,6 +87,7 @@
 
 <script setup>
 import { extractPriceAndCurrency } from "@/assets/prices";
+import { mergeDraggedItemInto, startItemDrag } from "@/itemDragDrop";
 import {
   computed,
   defineProps,
@@ -105,6 +112,7 @@ const props = defineProps({
 });
 
 const isUpdating = ref(false);
+const isDragOver = ref(false);
 const showBottomMenu = ref(false);
 const newTitle = ref("");
 
@@ -217,6 +225,23 @@ function openWithoutClosing() {
   browser.tabs.create({ active: false, url: props.item.url });
 }
 
+function startDrag(event) {
+  startItemDrag(event, props.itemKey);
+}
+
+function showDropTarget() {
+  isDragOver.value = true;
+}
+
+function finishDrag() {
+  isDragOver.value = false;
+}
+
+async function dropItem(event) {
+  finishDrag();
+  await mergeDraggedItemInto(event, props.itemKey);
+}
+
 function deleteItem() {
   browser.storage.sync.remove(props.itemKey);
 }
@@ -289,5 +314,10 @@ function itemUpdateFinishedHandler(payload) {
 
 .is-updating {
   filter: blur(2px);
+}
+
+.is-drag-over {
+  outline: 2px dashed var(--primary);
+  outline-offset: -2px;
 }
 </style>
