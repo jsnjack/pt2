@@ -9,9 +9,20 @@
       <h5>You have no items to track</h5>
     </div>
   </div>
+  <div
+    v-else-if="orderedItemsList.length === 0"
+    class="medium-height middle-align center-align padding"
+    style="background-color: var(--surface-container-lowest)"
+  >
+    <div class="center-align">
+      <i class="extra">search_off</i>
+      <h5>No matching items</h5>
+    </div>
+  </div>
   <Item
     v-for="item in orderedItemsList"
     :key="item._key"
+    :force-show-linked="isFiltering"
     :item="item"
     :item-key="item._key"
   />
@@ -26,17 +37,55 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  filterQuery: {
+    type: String,
+    default: "",
+  },
 });
+
+const normalizedFilterQuery = computed(() =>
+  props.filterQuery.trim().toLowerCase(),
+);
+const isFiltering = computed(() => normalizedFilterQuery.value.length > 0);
+
+function normalizeSearchValue(value) {
+  return String(value || "").toLowerCase();
+}
+
+function itemMatchesFilter(item, query) {
+  if (!query) {
+    return true;
+  }
+
+  let hostname = "";
+  try {
+    hostname = new URL(item.url).hostname;
+  } catch {
+    hostname = "";
+  }
+
+  return [
+    item.title,
+    item.url,
+    hostname,
+    item.currentValue,
+    item.initialValue,
+    item.selector,
+  ]
+    .map(normalizeSearchValue)
+    .some((value) => value.includes(query));
+}
 
 const orderedItemsList = computed(() => {
   let orderedItems = [];
+  const query = normalizedFilterQuery.value;
 
   // First, add all items that are not linked to another item (main items)
   for (let key in props.items) {
     if (props.items[key].linkedTo !== "") {
       continue;
     }
-    orderedItems.push(props.items[key]);
+    orderedItems.push({ ...props.items[key] });
     orderedItems[orderedItems.length - 1]._key = key;
     orderedItems[orderedItems.length - 1]._linked = [];
   }
@@ -45,7 +94,7 @@ const orderedItemsList = computed(() => {
   for (let key in props.items) {
     if (props.items[key].linkedTo !== "") {
       let linkedTo = props.items[key].linkedTo;
-      let self = props.items[key];
+      let self = { ...props.items[key] };
       let linkedToItemIndex = orderedItems.findIndex(
         (item) => item._key === linkedTo,
       );
@@ -60,6 +109,30 @@ const orderedItemsList = computed(() => {
       orderedItems[linkedToItemIndex]._linked.push(self);
     }
   }
+
+  if (query) {
+    orderedItems = orderedItems
+      .map((item) => {
+        const linkedMatches = item._linked.filter((linkedItem) =>
+          itemMatchesFilter(linkedItem, query),
+        );
+
+        if (itemMatchesFilter(item, query)) {
+          return item;
+        }
+
+        if (linkedMatches.length > 0) {
+          return {
+            ...item,
+            _linked: linkedMatches,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+  }
+
   return orderedItems.sort((a, b) => {
     return a.title.localeCompare(b.title);
   });

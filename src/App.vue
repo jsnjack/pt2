@@ -12,6 +12,7 @@ let portToBackground = null;
 
 const showPopup = ref(true);
 const itemsList = ref({});
+const filterQuery = ref("");
 
 onMounted(() => {
   // Reset badge text
@@ -97,7 +98,28 @@ onUnmounted(() => {
 
 <template>
   <main v-show="showPopup">
-    <ItemList :items="itemsList" />
+    <div class="small-padding filter-bar">
+      <div class="field prefix suffix border small no-margin">
+        <i>search</i>
+        <input v-model="filterQuery" type="search" />
+        <button
+          v-if="filterQuery"
+          class="transparent circle"
+          type="button"
+          @click="filterQuery = ''"
+        >
+          <i>close</i>
+        </button>
+        <label>Filter items</label>
+      </div>
+    </div>
+    <ItemList :filter-query="filterQuery" :items="itemsList" />
     <FooterOverview @toggle-popup="showPopup = false" />
   </main>
 </template>
+
+<style scoped>
+.filter-bar {
+  background-color: var(--surface-container-lowest);
+}
+</style>

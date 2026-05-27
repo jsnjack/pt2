@@ -78,7 +78,7 @@
 
   <LinkedItem
     v-for="linkedItem in props.item._linked"
-    v-show="showBottomMenu"
+    v-show="showBottomMenu || props.forceShowLinked"
     :key="linkedItem._key"
     :item="linkedItem"
     :item-key="linkedItem._key"
@@ -108,6 +108,10 @@ const props = defineProps({
   itemKey: {
     type: String,
     required: true,
+  },
+  forceShowLinked: {
+    type: Boolean,
+    default: false,
   },
 });
 
